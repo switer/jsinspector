@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>iframe using for cross-domain request</title>
+</head>
+<body>
+    <script>
+        window.addEventListener('message', function (event) {
+
+            if (Object.prototype.toString.call(event.data) !== '[object Object]') return;
+            var options = event.data;
+
+            request({
+                url: '/src',
+                data: {
+                    url: encodeURIComponent(options.url)
+                },
+                success: function (data, xhr) {
+                    event.source.postMessage({
+                        id: options.id,
+                        data: data,
+                        status: xhr.status
+                    }, '*');
+                }
+            });
+        });
+
+        function request (options) {
+            var xhr = new XMLHttpRequest(),
+                method = options.method ? options.method.toUpperCase() : "GET";
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var data = xhr.responseText;
+                    try {
+                        data = JSON.parse(data);    
+                    } catch (e) {
+
+                    }
+                    options.success && options.success(data, xhr);
+                } else {
+                    options.error && options.error(xhr);
+                } 
+            }
+
+            if (method == 'POST' || method == 'PUT' || !options.data) {
+                xhr.open(method, options.url, false);
+                xhr.send(options.data);
+            } else {
+                var keys = Object.keys(options.data),
+                    params = [];
+                keys.forEach(function (item, index) {
+                    params.push(item + '=' + options.data[item]);
+                });
+                xhr.open(method, options.url + '?' + params.join('&'), false);
+                xhr.send(null);
+            }
+        }
+    </script>
+</body>
+</html>
