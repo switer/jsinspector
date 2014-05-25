@@ -1,5 +1,8 @@
 var express = require('express'),
     app = new express(),
+    server = require('http').createServer(app),
+    io = require('socket.io').listen(server),
+    // io = require('socket.io').listen(app),
     fs = require('fs'),
     url = require('url'),
     http = require('http');
@@ -46,4 +49,12 @@ app.get('/devtools', function (req, res) {
     res.send(html);
 });
 
-app.listen(3001);
+server.listen(3001);
+// app.listen(3001);
+
+io.sockets.on('connection', function (socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });
+});
