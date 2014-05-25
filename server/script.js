@@ -87,7 +87,8 @@
 
         iframe.contentWindow.postMessage({
             id: id,
-            url: url
+            url: url,
+            static: true
         }, '*');
 
         /**
@@ -97,6 +98,20 @@
             success: function (data) {
                 success(data.data);
             },
+            error: error
+        };
+    }
+    function $ajax (options, success, error) {
+        var id = requestId ++; 
+
+        options.id = id;
+        iframe.contentWindow.postMessage(options, '*');
+
+        /**
+         *  register postMessage callback
+         **/
+        requestHandlers[id] = {
+            success: success,
             error: error
         };
     }
@@ -123,7 +138,16 @@
         window.addEventListener('load', function () {
             replaceCORSStyleSheet(function () {
                 var matchesRules = getMatchesRules(document.body);
-                console.log(matchesRules);
+
+                $ajax({
+                    method: 'POST',
+                    url: '/stylesheets',
+                    data: {
+                        rules: matchesRules
+                    }
+                }, function () {
+                    console.log('success');
+                });
             });
         });
     }

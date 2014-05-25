@@ -11,19 +11,41 @@
             if (Object.prototype.toString.call(event.data) !== '[object Object]') return;
             var options = event.data;
 
-            request({
-                url: '/src',
-                data: {
-                    url: encodeURIComponent(options.url)
-                },
-                success: function (data, xhr) {
-                    event.source.postMessage({
-                        id: options.id,
-                        data: data,
-                        status: xhr.status
-                    }, '*');
-                }
-            });
+            if (options.static) {
+                request({
+                    url: '/src',
+                    data: {
+                        url: encodeURIComponent(options.url)
+                    },
+                    success: function (data, xhr) {
+                        event.source.postMessage({
+                            id: options.id,
+                            data: data,
+                            status: xhr.status
+                        }, '*');
+                    }
+                });
+            } else {
+                request({
+                    method: options.method,
+                    url: options.url,
+                    data: options.data,
+                    success: function (data, xhr) {
+                        event.source.postMessage({
+                            id: options.id,
+                            data: data,
+                            status: xhr.status
+                        }, '*');
+                    },
+                    error: function (err, xhr) {
+                        event.source.postMessage({
+                            id: options.id,
+                            error: err,
+                            status: xhr.status
+                        }, '*');
+                    }
+                });                
+            }
         });
 
         function request (options) {
@@ -38,7 +60,7 @@
                     // } catch (e) {}
                     options.success && options.success(data, xhr);
                 } else {
-                    options.error && options.error(xhr);
+                    options.error && options.error('', xhr);
                 } 
             }
 
@@ -49,7 +71,7 @@
                 var keys = Object.keys(options.data),
                     params = [];
                 keys.forEach(function (item, index) {
-                    params.push(item + '=' + options.data[item]);
+                    params.push(item + '=' + JSON.stringify(options.data[item]));
                 });
                 xhr.open(method, options.url + '?' + params.join('&'), false);
                 xhr.send(null);

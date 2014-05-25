@@ -20,7 +20,7 @@ app.get('/iframe', function (req, res) {
 });
 
 app.get('/src', function (req, res) {
-    var srcUrl = req.query.url;
+    var srcUrl = req.query.url.replace(/"/g, '');
     if (!srcUrl) {
         res.send(404, 'uncorrect source url, example: /src?url=xxx');
         return;
@@ -50,11 +50,16 @@ app.get('/devtools', function (req, res) {
 });
 
 server.listen(3001);
-// app.listen(3001);
 
+app.post('/stylesheets', function (req, res) {
+    console.log(req.body)
+    io.sockets.emit('inspect:stylesheet:update', {
+        data: '------'
+    });
+    res.send(200);
+});
 io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
+    socket.on('stylesheet:update:xxx', function (data) {
+        console.log(data);
+    });
 });
