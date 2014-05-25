@@ -1,7 +1,10 @@
 var express = require('express'),
     app = new express(),
     fs = require('fs'),
+    url = require('url'),
     http = require('http');
+
+app.use(express.static(__dirname + '/public'));
 
 app.get('/', function (req, res) {
     var index = fs.readFileSync('../index.html', 'utf-8');
@@ -27,16 +30,20 @@ app.get('/src', function (req, res) {
             res.end();
         });
     }).on('error', function(e) {
-        console.log("Got error: " + e.message);
         res.send(500, e.message);
     });
-
 });
 
 app.get('/inspector', function (req, res) {
-    var script = fs.readFileSync('../script.js');
+    var scriptId = url.parse(req.url).search.replace(/^\?/, '');
+    var script = fs.readFileSync('./script.js');
     res.setHeader('Content-type', 'application/javascript');
     res.send(script);
+});
+
+app.get('/devtools', function (req, res) {
+    var html = fs.readFileSync('./devtools.html', 'utf-8');
+    res.send(html);
 });
 
 app.listen(3001);

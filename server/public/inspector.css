@@ -1,0 +1,16 @@
+body {margin: 0;}
+#wrapper ul {padding: 0;margin: 0;list-style-type: none;}
+
+.stylesheet {border-bottom: 1px solid #ccc;}
+.stylesheet .content {padding: 4px; font-size: 13px;color: #333;}
+    .stylesheet .head {padding: 4px;display: -webkit-box;}
+        .stylesheet .selector {-webkit-box-flex:1;}
+        .stylesheet .href {color: #ccc;display: block;}
+
+    .stylesheet .rules {padding-left: 1em;}
+        .stylesheet .rule {display: -webkit-box;}
+            .stylesheet .style-selector, .stylesheet .style-value {border: 0;display: inline-block;outline: 0;
+                box-sizing:border-box;height: 20px;line-height: 20px;}
+            .stylesheet .style-selector:focus {border: 1px solid #bbb;padding: 0 2px;}
+            .stylesheet .style-value:focus {border: 1px solid #bbb;padding: 0 2px;}
+            .stylesheet .style-selector {color: green;}

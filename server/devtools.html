@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="lib/zepto.min.js"></script>
+    <script src="lib/vue.min.js"></script>
+    <link rel="stylesheet" href="inspector.css">
+</head>
+<body>
+    <div id="wrapper" style="font-size: 10px;"></div>
+    <script type="text/teamplate" id="tpl-style-list">
+        <ul>
+            <li v-repeat="sheets" class="stylesheet">
+                <div class="content">
+                    <div class="head">
+                        <div class="selector">{{selectorText}} {</div>
+                        <a class="href" href="{{href}}">{{href | source}}</a>
+                    </div>
+                    <div class="rules">
+                        <div v-repeat="styleRules" class="rule">
+                            <div type="text" class="style-selector" contenteditable=true draggable=false>{{selector}}</div>:
+                            <div type="text" class="style-value" contenteditable=true draggable=false>{{value}}</div>;
+                        </div>
+                    </div>
+                    <div class="foot">}</div>
+                </div>
+            </li>
+        </ul>
+    </script>
+    <script src="inspector.view.js"></script>
+    <script src="inspector.test.js"></script>
+</body>
+</html>
