@@ -2,8 +2,8 @@ var express = require('express'),
     app = new express(),
     server = require('http').createServer(app),
     io = require('socket.io').listen(server),
-    // io = require('socket.io').listen(app),
     fs = require('fs'),
+    bodyParser = require('body-parser'),
     url = require('url'),
     http = require('http');
 
@@ -51,15 +51,17 @@ app.get('/devtools', function (req, res) {
 
 server.listen(3001);
 
+app.use(bodyParser());
 app.post('/stylesheets', function (req, res) {
-    console.log(req.body)
     io.sockets.emit('inspect:stylesheet:update', {
-        data: '------'
+        data: JSON.parse(req.body.rules)
     });
     res.send(200);
 });
+
+/* =================================================================== */
+/* Socket.io */
+io.set('log level', 1);
 io.sockets.on('connection', function (socket) {
-    socket.on('stylesheet:update:xxx', function (data) {
-        console.log(data);
-    });
+    // socket.on('stylesheet:update:xxx', function (data) {});
 });

@@ -55,24 +55,24 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     var data = xhr.responseText;
-                    // try {
-                    //     data = JSON.parse(data);    
-                    // } catch (e) {}
                     options.success && options.success(data, xhr);
                 } else {
                     options.error && options.error('', xhr);
                 } 
             }
 
+            // to query string
+            var keys = Object.keys(options.data),
+                params = [];
+            keys.forEach(function (item, index) {
+                params.push(item + '=' + JSON.stringify(options.data[item]));
+            });
+
             if (method == 'POST' || method == 'PUT' || !options.data) {
                 xhr.open(method, options.url, false);
-                xhr.send(options.data);
+                xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhr.send(params.join('&'));
             } else {
-                var keys = Object.keys(options.data),
-                    params = [];
-                keys.forEach(function (item, index) {
-                    params.push(item + '=' + JSON.stringify(options.data[item]));
-                });
                 xhr.open(method, options.url + '?' + params.join('&'), false);
                 xhr.send(null);
             }

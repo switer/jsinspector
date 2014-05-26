@@ -32,11 +32,10 @@
     <script src="inspector.test.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      var socket = io.connect('http://localhost');
-      socket.on('inspect:stylesheet:update', function (data) {
-        console.log(data);
-        // socket.emit('my other event', { my: 'data' });
-      });
+        var socket = io.connect('http://localhost');
+        socket.on('inspect:stylesheet:update', function (data) {
+            stylesList.$data.styleSheets = data.data;
+        });
     </script>
 </body>
 </html>
