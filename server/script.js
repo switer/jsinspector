@@ -1,13 +1,16 @@
 (function () {
-    var iframe = document.createElement('iframe'),
+    var slice = Array.prototype.slice,
+        iframe = document.createElement('iframe'),
         requestHandlers = {},
+        lastPostHTML = '',
         requestId = 0;
 
     /**
      *  create iframe for CORS
      **/
     iframe.style.display = 'none';
-    iframe.src = '/iframe';
+    iframe.src = 'http://localhost:3001/iframe';
+    iframe.id = '__jsinspector_cors_iframe';
     document.body.appendChild(iframe);
 
     /**
@@ -18,8 +21,7 @@
     }
 
     function getMatchesRules ($el) {
-        var slice = Array.prototype.slice,
-            styleSheets = slice.call(document.styleSheets),
+        var styleSheets = slice.call(document.styleSheets),
             matches = [];
 
         if (styleSheets) {
@@ -47,8 +49,7 @@
      *  replace those cross-domain stylesheet
      **/
     function replaceCORSStyleSheet (callback) {
-        var slice = Array.prototype.slice,
-            styleSheets = slice.call(document.styleSheets),
+        var styleSheets = slice.call(document.styleSheets),
             count = styleSheets.length;
 
         styleSheets.forEach(function (item) {
@@ -77,6 +78,60 @@
         }
     };
 
+    /**
+     *  get document html
+     **/
+    function getDocuemnt () {
+
+
+        var doc = document.documentElement.cloneNode(true),
+            scripts = slice.call(doc.querySelectorAll('script')),
+            styleSheets = slice.call(doc.querySelectorAll('link')),
+            images = slice.call(doc.querySelectorAll('img'));
+
+        scripts.forEach(function (item) {
+            item.innerHTML = '';
+            item.src = "";
+        });
+        styleSheets.forEach(function (item) {
+            item.setAttribute('href', item.href);
+            // var href = item.getAttribute('href');
+            // if (href && item.getAttribute('rel') == 'stylesheet' && !href.match(/^http[s]*:\/\//)) {
+            //     item.setAttribute('href', window.location.origin + href);
+            // }
+        });
+        images.forEach(function (item) {
+            item.setAttribute('src', item.src);
+            // if (!item.src.match(/^http[s]*:\/\//)) {
+            //     item.src = window.location.origin + item.src;
+            // }
+        });
+
+        return doc.innerHTML
+        
+    }
+
+    function postDocument (success, error) {
+        var html = getDocuemnt();
+
+        if (html == lastPostHTML) {
+            success && success();
+            return;
+        }
+
+        lastPostHTML = html;
+
+        $ajax({
+            method: 'POST',
+            url: '/html',
+            type: 'text/plain',
+            data: html,
+        }, function () {
+            success && success();
+        }, function () {
+            error && error();
+        });
+    }
 
     /* =================================================================== */
     /**
@@ -149,6 +204,13 @@
                     console.log('success');
                 });
             });
+            function postCallback () {
+                postDocument(function () {
+                    setTimeout(postCallback, 300);
+                });
+            }
+            postCallback();
+
         });
     }
 })();

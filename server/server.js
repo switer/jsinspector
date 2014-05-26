@@ -49,7 +49,13 @@ app.get('/devtools', function (req, res) {
     res.send(html);
 });
 
-server.listen(3001);
+app.get('/inspector_frame', function (req, res) {
+    var html = fs.readFileSync('./inspector_frame.html', 'utf-8');
+    res.send(html);
+});
+
+
+
 
 app.use(bodyParser());
 app.post('/stylesheets', function (req, res) {
@@ -58,6 +64,26 @@ app.post('/stylesheets', function (req, res) {
     });
     res.send(200);
 });
+
+function rawBody(req, res, next) {
+  req.setEncoding('utf8');
+  req.rawBody = '';
+  req.on('data', function(chunk) {
+    req.rawBody += chunk;
+  });
+  req.on('end', function(){
+    next();
+  });
+}
+
+app.post('/html', rawBody, function (req, res) {
+    io.sockets.emit('inspect:html:update', {
+        data: req.rawBody
+    });
+    res.send(200);
+});
+
+server.listen(3001);
 
 /* =================================================================== */
 /* Socket.io */

@@ -1,5 +1,8 @@
-body {margin: 0;}
-#wrapper ul {padding: 0;margin: 0;list-style-type: none;}
+body {margin: 0;display: -webkit-box;height: 100%;position: absolute;width: 100%;}
+
+#inspectorFrame {display: block;-webkit-box-flex:1;}
+#wrapper {/* -webkit-box-flex:1; */}
+#wrapper ul {padding: 0;margin: 0;list-style-type: none;border-left: 1px solid #bbb;-}
 
 .stylesheet {border-bottom: 1px solid #ccc;}
 .stylesheet .content {padding: 4px; font-size: 13px;color: #333;}

@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>JSInspector devtools</title>
     <script src="lib/zepto.min.js"></script>
     <script src="lib/vue.min.js"></script>
     <link rel="stylesheet" href="inspector.css">
 </head>
 <body>
+    <iframe src="about:blank" frameborder="0" id="inspectorFrame"></iframe>
     <div id="wrapper" style="font-size: 10px;"></div>
     <script type="text/teamplate" id="tpl-style-list">
         <ul>
@@ -32,10 +33,16 @@
     <script src="inspector.test.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        var inspectorFrame = document.querySelector('#inspectorFrame');
         var socket = io.connect('http://localhost');
         socket.on('inspect:stylesheet:update', function (data) {
             stylesList.$data.styleSheets = data.data;
         });
+        socket.on('inspect:html:update', function (data) {
+            inspectorFrame.contentDocument.open(); 
+            inspectorFrame.contentDocument.write(data.data);
+        });
+
     </script>
 </body>
 </html>
