@@ -39,10 +39,20 @@
             stylesList.$data.styleSheets = data.data;
         });
         socket.on('inspect:html:update', function (data) {
-            inspectorFrame.contentDocument.open(); 
-            inspectorFrame.contentDocument.write(data.data);
-        });
+            data = data.data;
+            var ispDoc = inspectorFrame.contentDocument,
+                ispWin = inspectorFrame.contentWindow;
 
+            if (data.html) {
+                ispDoc.open(); 
+                ispDoc.write(data.html);
+            }
+            if (data.meta.scrollTop !== undefined) {
+                ispWin.scrollTo(0, data.meta.scrollTop);
+            }
+            // ispWin.onload = function () {
+            // }
+        });
     </script>
 </body>
 </html>

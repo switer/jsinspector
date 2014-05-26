@@ -3,12 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>iframe using for cross-domain request</title>
+<!-- 
+    <script src="/socket.io/socket.io.js"></script>
+     -->
 </head>
 <body>
     <script>
-        window.addEventListener('message', function (event) {
+        // var socket = io.connect('http://localhost');
 
-            if (Object.prototype.toString.call(event.data) !== '[object Object]') return;
+        function type (obj) {
+            return Object.prototype.toString.call(obj).match(/\[object (\w+)\]/)[1].toLowerCase();
+        }
+        window.addEventListener('message', function (event) {
+            if (type(event.data) !== 'object') return;
+
             var options = event.data;
 
             if (options.static) {
@@ -48,7 +56,10 @@
                 });                
             }
         });
-
+        
+        /**
+         *  ajax request
+         **/
         function request (options) {
             var xhr = new XMLHttpRequest(),
                 method = options.method ? options.method.toUpperCase() : "GET";

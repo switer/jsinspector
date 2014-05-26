@@ -23,6 +23,7 @@
   "dependencies": {
     "express": "^4.3.1",
     "socket.io": "^0.9.17",
-    "body-parser": "^1.2.0"
+    "body-parser": "^1.2.0",
+    "ejs": "^1.0.0"
   }
 }

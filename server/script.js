@@ -3,13 +3,14 @@
         iframe = document.createElement('iframe'),
         requestHandlers = {},
         lastPostHTML = '',
-        requestId = 0;
+        requestId = 0,
+        inspectorId = '<%= inspectorId %>';
 
     /**
      *  create iframe for CORS
      **/
     iframe.style.display = 'none';
-    iframe.src = 'http://localhost:3001/iframe';
+    iframe.src = '<%= host %>/iframe';
     iframe.id = '__jsinspector_cors_iframe';
     document.body.appendChild(iframe);
 
@@ -125,11 +126,35 @@
             method: 'POST',
             url: '/html',
             type: 'text/plain',
-            data: html,
+            data: JSON.stringify({
+                html: html,
+                meta: {
+                    scrollTop: document.body.scrollTop
+                },
+                inspectorId: inspectorId
+            }),
+            withId: true
         }, function () {
             success && success();
         }, function () {
             error && error();
+        });
+    }
+
+    function syncMeta () {
+        window.addEventListener('scroll', function () {
+            $ajax({
+                method: 'POST',
+                url: '/html',
+                type: 'text/plain',
+                data: JSON.stringify({
+                    meta: {
+                        scrollTop: document.body.scrollTop
+                    },
+                    inspectorId: inspectorId
+                }),
+                withId: true
+            }); 
         });
     }
 
@@ -201,16 +226,17 @@
                         rules: matchesRules
                     }
                 }, function () {
-                    console.log('success');
+                    // console.log('success');
                 });
             });
+
             function postCallback () {
                 postDocument(function () {
                     setTimeout(postCallback, 300);
                 });
             }
             postCallback();
-
+            syncMeta();
         });
     }
 })();

@@ -1,4 +1,5 @@
 var express = require('express'),
+    ejs = require('ejs'),
     app = new express(),
     server = require('http').createServer(app),
     io = require('socket.io').listen(server),
@@ -39,9 +40,12 @@ app.get('/src', function (req, res) {
 
 app.get('/inspector', function (req, res) {
     var scriptId = url.parse(req.url).search.replace(/^\?/, '');
-    var script = fs.readFileSync('./script.js');
+    var script = fs.readFileSync('./script.js', 'utf-8');
     res.setHeader('Content-type', 'application/javascript');
-    res.send(script);
+    res.send(ejs.render(script, {
+        host: 'http://' + req.headers.host,
+        inspectorId: scriptId
+    }));
 });
 
 app.get('/devtools', function (req, res) {
@@ -53,8 +57,6 @@ app.get('/inspector_frame', function (req, res) {
     var html = fs.readFileSync('./inspector_frame.html', 'utf-8');
     res.send(html);
 });
-
-
 
 
 app.use(bodyParser());
@@ -78,7 +80,7 @@ function rawBody(req, res, next) {
 
 app.post('/html', rawBody, function (req, res) {
     io.sockets.emit('inspect:html:update', {
-        data: req.rawBody
+        data: JSON.parse(req.rawBody)
     });
     res.send(200);
 });
@@ -88,6 +90,4 @@ server.listen(3001);
 /* =================================================================== */
 /* Socket.io */
 io.set('log level', 1);
-io.sockets.on('connection', function (socket) {
-    // socket.on('stylesheet:update:xxx', function (data) {});
-});
+io.sockets.on('connection', function (socket) {});
