@@ -104,8 +104,16 @@
         inputs.forEach(function (item) {
             item.setAttribute('value', item.value);
         });
+        // get document doctype
+        var node = document.doctype,
+            doctype = "<!DOCTYPE "
+                        + node.name
+                        + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
+                        + (!node.publicId && node.systemId ? ' SYSTEM' : '') 
+                        + (node.systemId ? ' "' + node.systemId + '"' : '')
+                        + '>';
 
-        return doc.innerHTML
+        return doctype + doc.innerHTML
         
     }
 
