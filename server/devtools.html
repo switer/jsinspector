@@ -12,7 +12,7 @@
     <iframe src="about:blank" frameborder="0" id="inspectorFrame"></iframe>
 
     <!-- inspector elements panel -->    
-    <div id="wrapper" style="font-size: 10px;"></div>
+    <div id="wrapper" style="font-size: 10px;display:none;"></div>
     <script type="text/teamplate" id="tpl-style-list">
         <ul>
             <li v-repeat="sheets" class="stylesheet">
@@ -53,7 +53,7 @@
                 // remove inspector CORS frame src and save dom for Xpath
                 data.html =data.html.replace(/<iframe\s*src="[^"]*"\s*id="__jsinspector_cors_iframe"/, 
                     '<iframe src="" id="__jsinspector_cors_iframe"');
-                ispDoc.write(data.html);
+                ispDoc.write('<!doctype html>' + data.html);
                 ispDoc.close();
                     
             }
