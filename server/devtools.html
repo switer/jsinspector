@@ -33,13 +33,18 @@
     <script src="inspector.test.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var inspectorFrame = document.querySelector('#inspectorFrame');
-        var socket = io.connect('http://localhost');
-        socket.on('inspect:stylesheet:update', function (data) {
-            stylesList.$data.styleSheets = data.data;
+        var socket = io.connect('<%= host %>'),
+            inspectorFrame = document.querySelector('#inspectorFrame'),
+            inspectorId = '<%= inspectorId %>';
+
+        socket.on('connect', function () {
+            socket.emit('inspect:html:init', {
+                inspectorId: inspectorId
+            });
+             
         });
-        socket.on('inspect:html:update', function (data) {
-            data = data.data;
+
+        function updateInspectorFrame (data) {
             var ispDoc = inspectorFrame.contentDocument,
                 ispWin = inspectorFrame.contentWindow;
 
@@ -50,9 +55,17 @@
             if (data.meta.scrollTop !== undefined) {
                 ispWin.scrollTo(0, data.meta.scrollTop);
             }
-            // ispWin.onload = function () {
-            // }
+        }
+
+        socket.on('inspect:html:init:<%= inspectorId %>', function (data) {
+            updateInspectorFrame(JSON.parse(data));
         });
+        socket.on('inspect:html:update:<%= inspectorId %>', function (data) {
+            updateInspectorFrame(JSON.parse(data));
+        });
+        // socket.on('inspect:stylesheet:update:<%= inspectorId %>', function (data) {
+        //     stylesList.$data.styleSheets = data.data;
+        // });
     </script>
 </body>
 </html>

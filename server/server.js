@@ -38,26 +38,32 @@ app.get('/src', function (req, res) {
     });
 });
 
-app.get('/inspector', function (req, res) {
-    var scriptId = url.parse(req.url).search.replace(/^\?/, '');
+function inspectorIdParse (req, res, next) {
+    req.inspectorId = url.parse(req.url).search.replace(/^\?/, '');
+    next();
+}
+
+app.get('/inspector', inspectorIdParse, function (req, res) {
     var script = fs.readFileSync('./script.js', 'utf-8');
     res.setHeader('Content-type', 'application/javascript');
     res.send(ejs.render(script, {
         host: 'http://' + req.headers.host,
-        inspectorId: scriptId
+        inspectorId: req.inspectorId
     }));
 });
 
-app.get('/devtools', function (req, res) {
+app.get('/devtools', inspectorIdParse, function (req, res) {
     var html = fs.readFileSync('./devtools.html', 'utf-8');
-    res.send(html);
+    res.send(ejs.render(html, {
+        host: req.headers.host,
+        inspectorId: req.inspectorId
+    }));
 });
 
 app.get('/inspector_frame', function (req, res) {
     var html = fs.readFileSync('./inspector_frame.html', 'utf-8');
     res.send(html);
 });
-
 
 app.use(bodyParser());
 app.post('/stylesheets', function (req, res) {
@@ -78,10 +84,27 @@ function rawBody(req, res, next) {
   });
 }
 
-app.post('/html', rawBody, function (req, res) {
-    io.sockets.emit('inspect:html:update', {
-        data: JSON.parse(req.rawBody)
-    });
+app.post('/html', inspectorIdParse, rawBody, function (req, res) {
+    var content = req.rawBody,
+        lastTmpData;
+
+    try {
+        lastTmpData = fs.readFileSync('tmp/inspector_html_' + req.inspectorId + '.json', 'utf-8');
+        lastTmpData = JSON.parse(lastTmpData);
+
+        var updatedData = JSON.parse(content);
+        if (!updatedData.html && lastTmpData.html) {
+            updatedData.html = lastTmpData.html;
+        }
+        console.log(!updatedData.html, !!lastTmpData.html);
+        lastTmpData = JSON.stringify(updatedData);
+    } catch (e) {
+        console.log('error ' + e);
+        lastTmpData = null;
+    }
+
+    fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', lastTmpData || content, 'utf-8');
+    io.sockets.emit('inspect:html:update:' + req.inspectorId, content);
     res.send(200);
 });
 
@@ -90,4 +113,14 @@ server.listen(3001);
 /* =================================================================== */
 /* Socket.io */
 io.set('log level', 1);
-io.sockets.on('connection', function (socket) {});
+io.sockets.on('connection', function (socket) {
+   socket.on('inspect:html:init', function (data) {
+        var tmp; 
+        try {
+            tmp = fs.readFileSync('tmp/inspector_html_' + data.inspectorId + '.json', 'utf-8');
+        } catch (e) {
+            
+        }
+        if (tmp) socket.emit('inspect:html:init:' + data.inspectorId, tmp);
+    });
+});

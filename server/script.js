@@ -88,7 +88,8 @@
         var doc = document.documentElement.cloneNode(true),
             scripts = slice.call(doc.querySelectorAll('script')),
             styleSheets = slice.call(doc.querySelectorAll('link')),
-            images = slice.call(doc.querySelectorAll('img'));
+            images = slice.call(doc.querySelectorAll('img')),
+            inputs = slice.call(doc.querySelectorAll('input'));
 
         scripts.forEach(function (item) {
             item.innerHTML = '';
@@ -96,16 +97,12 @@
         });
         styleSheets.forEach(function (item) {
             item.setAttribute('href', item.href);
-            // var href = item.getAttribute('href');
-            // if (href && item.getAttribute('rel') == 'stylesheet' && !href.match(/^http[s]*:\/\//)) {
-            //     item.setAttribute('href', window.location.origin + href);
-            // }
         });
         images.forEach(function (item) {
             item.setAttribute('src', item.src);
-            // if (!item.src.match(/^http[s]*:\/\//)) {
-            //     item.src = window.location.origin + item.src;
-            // }
+        });
+        inputs.forEach(function (item) {
+            item.setAttribute('value', item.value);
         });
 
         return doc.innerHTML
@@ -124,7 +121,7 @@
 
         $ajax({
             method: 'POST',
-            url: '/html',
+            url: '/html?<%= inspectorId %>',
             type: 'text/plain',
             data: JSON.stringify({
                 html: html,
@@ -145,7 +142,7 @@
         window.addEventListener('scroll', function () {
             $ajax({
                 method: 'POST',
-                url: '/html',
+                url: '/html?<%= inspectorId %>',
                 type: 'text/plain',
                 data: JSON.stringify({
                     meta: {
@@ -216,7 +213,7 @@
          *  replace cross-domain's stylesheets
          **/
         window.addEventListener('load', function () {
-            replaceCORSStyleSheet(function () {
+/*            replaceCORSStyleSheet(function () {
                 var matchesRules = getMatchesRules(document.body);
 
                 $ajax({
@@ -228,7 +225,7 @@
                 }, function () {
                     // console.log('success');
                 });
-            });
+            });*/
 
             function postCallback () {
                 postDocument(function () {
