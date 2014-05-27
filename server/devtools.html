@@ -8,7 +8,10 @@
     <link rel="stylesheet" href="inspector.css">
 </head>
 <body>
+    <!-- inpsctor inspected device view frame -->
     <iframe src="about:blank" frameborder="0" id="inspectorFrame"></iframe>
+
+    <!-- inspector elements panel -->    
     <div id="wrapper" style="font-size: 10px;"></div>
     <script type="text/teamplate" id="tpl-style-list">
         <ul>
@@ -31,41 +34,51 @@
     </script>
     <script src="inspector.view.js"></script>
     <script src="inspector.test.js"></script>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io.connect('<%= host %>'),
-            inspectorFrame = document.querySelector('#inspectorFrame'),
-            inspectorId = '<%= inspectorId %>';
+            inspectorId = '<%= inspectorId %>',
+            inspectorFrame = document.querySelector('#inspectorFrame');
 
-        socket.on('connect', function () {
-            socket.emit('inspect:html:init', {
-                inspectorId: inspectorId
-            });
-             
-        });
-
+        /**
+         *  update inspected device view
+         **/
         function updateInspectorFrame (data) {
             var ispDoc = inspectorFrame.contentDocument,
                 ispWin = inspectorFrame.contentWindow;
 
             if (data.html) {
-                ispDoc.open(); 
+                ispDoc.open();
+                // remove inspector CORS frame src and save dom for Xpath
+                data.html =data.html.replace(/<iframe\s*src="[^"]*"\s*id="__jsinspector_cors_iframe"/, 
+                    '<iframe src="" id="__jsinspector_cors_iframe"');
                 ispDoc.write(data.html);
+                ispDoc.close();
+                    
             }
-            if (data.meta.scrollTop !== undefined) {
-                ispWin.scrollTo(0, data.meta.scrollTop);
+            if (data.html) {
+                if (data.meta.scrollTop !== undefined) {
+                    ispWin.scrollTo(0, data.meta.scrollTop);
+                }
             }
         }
 
+        socket.on('connect', function () {
+            // when connect initialize device view with server-side temp data;
+            socket.emit('inspect:html:init', {
+                inspectorId: inspectorId
+            });
+             
+        });
+        // receive init data
         socket.on('inspect:html:init:<%= inspectorId %>', function (data) {
             updateInspectorFrame(JSON.parse(data));
         });
+        // device view update 
         socket.on('inspect:html:update:<%= inspectorId %>', function (data) {
             updateInspectorFrame(JSON.parse(data));
         });
-        // socket.on('inspect:stylesheet:update:<%= inspectorId %>', function (data) {
-        //     stylesList.$data.styleSheets = data.data;
-        // });
     </script>
 </body>
 </html>
