@@ -1,25 +1,23 @@
 var express = require('express'),
-    ejs = require('ejs'),
-    app = new express(),
-    server = require('http').createServer(app),
-    io = require('socket.io').listen(server),
     fs = require('fs'),
-    bodyParser = require('body-parser'),
+    ejs = require('ejs'),
     url = require('url'),
-    http = require('http');
+    http = require('http'),
+    compress = require('compression'),
+    app = new express(),
+    server = http.createServer(app),
+    io = require('socket.io').listen(server),
+    bodyParser = require('body-parser');
 
+app.use(compress());
 app.use(express.static(__dirname + '/public'));
+app.use(bodyParser());
 
+/* =================================================================== */
 app.get('/', function (req, res) {
-    var index = fs.readFileSync('../index.html', 'utf-8');
-    res.send(index);
+    var html = fs.readFileSync('../index.html', 'utf-8');
+    res.send(html);
 });
-
-app.get('/iframe', function (req, res) {
-    var iframe = fs.readFileSync('./iframe.html', 'utf-8');
-    res.send(iframe);
-});
-
 app.get('/src', function (req, res) {
     var srcUrl = req.query.url.replace(/"/g, '');
     if (!srcUrl) {
@@ -37,12 +35,6 @@ app.get('/src', function (req, res) {
         res.send(500, e.message);
     });
 });
-
-function inspectorIdParse (req, res, next) {
-    req.inspectorId = url.parse(req.url).search.replace(/^\?/, '');
-    next();
-}
-
 app.get('/inspector', inspectorIdParse, function (req, res) {
     var script = fs.readFileSync('./script.js', 'utf-8');
     res.setHeader('Content-type', 'application/javascript');
@@ -51,7 +43,6 @@ app.get('/inspector', inspectorIdParse, function (req, res) {
         inspectorId: req.inspectorId
     }));
 });
-
 app.get('/devtools', inspectorIdParse, function (req, res) {
     var html = fs.readFileSync('./devtools.html', 'utf-8');
     res.send(ejs.render(html, {
@@ -59,31 +50,18 @@ app.get('/devtools', inspectorIdParse, function (req, res) {
         inspectorId: req.inspectorId
     }));
 });
-
 app.get('/inspector_frame', function (req, res) {
     var html = fs.readFileSync('./inspector_frame.html', 'utf-8');
     res.send(html);
 });
 
-app.use(bodyParser());
+/* =================================================================== */
 app.post('/stylesheets', function (req, res) {
     io.sockets.emit('inspect:stylesheet:update', {
         data: JSON.parse(req.body.rules)
     });
     res.send(200);
 });
-
-function rawBody(req, res, next) {
-  req.setEncoding('utf8');
-  req.rawBody = '';
-  req.on('data', function(chunk) {
-    req.rawBody += chunk;
-  });
-  req.on('end', function(){
-    next();
-  });
-}
-
 app.post('/html', inspectorIdParse, rawBody, function (req, res) {
     var content = req.rawBody,
         lastTmpData;
@@ -96,10 +74,8 @@ app.post('/html', inspectorIdParse, rawBody, function (req, res) {
         if (!updatedData.html && lastTmpData.html) {
             updatedData.html = lastTmpData.html;
         }
-        console.log(!updatedData.html, !!lastTmpData.html);
         lastTmpData = JSON.stringify(updatedData);
     } catch (e) {
-        console.log('error ' + e);
         lastTmpData = null;
     }
 
@@ -107,6 +83,22 @@ app.post('/html', inspectorIdParse, rawBody, function (req, res) {
     io.sockets.emit('inspect:html:update:' + req.inspectorId, content);
     res.send(200);
 });
+
+function inspectorIdParse (req, res, next) {
+    req.inspectorId = url.parse(req.url).search.replace(/^\?/, '');
+    next();
+}
+
+function rawBody(req, res, next) {
+  req.setEncoding('utf8');
+  req.rawBody = '';
+  req.on('data', function(chunk) {
+    req.rawBody += chunk;
+  });
+  req.on('end', function(){
+    next();
+  });
+}
 
 server.listen(3001);
 

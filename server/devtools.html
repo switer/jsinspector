@@ -39,23 +39,38 @@
     <script>
         var socket = io.connect('<%= host %>'),
             inspectorId = '<%= inspectorId %>',
-            inspectorFrame = document.querySelector('#inspectorFrame');
+            inspectorFrame = document.querySelector('#inspectorFrame'),
+            slice = Array.prototype.slice;
 
         /**
          *  update inspected device view
          **/
         function updateInspectorFrame (data) {
+
             var ispDoc = inspectorFrame.contentDocument,
                 ispWin = inspectorFrame.contentWindow;
 
             if (data.html) {
                 ispDoc.open();
                 // remove inspector CORS frame src and save dom for Xpath
-                data.html =data.html.replace(/<iframe\s*src="[^"]*"\s*id="__jsinspector_cors_iframe"/, 
+                data.html = data.html.replace(/<iframe\s*src="[^"]*"\s*id="__jsinspector_cors_iframe"/, 
                     '<iframe src="" id="__jsinspector_cors_iframe"');
                 ispDoc.write(data.html);
                 ispDoc.close();
-                    
+
+                // slice.call(ispDoc.querySelectorAll('link[isp-href]')).forEach(function (item) {
+                //     item.href = item.getAttribute('isp-href');
+                //     item.removeAttribute('isp-href'); 
+                // });
+                // slice.call(ispDoc.querySelectorAll('img[isp-src]')).forEach(function (item) {
+                //     item.src = item.getAttribute('isp-src');
+                //     item.removeAttribute('isp-src'); 
+                // });
+                // slice.call(ispDoc.querySelectorAll('input[isp-value]')).forEach(function (item) {
+                //     item.value = item.getAttribute('isp-value');
+                //     item.removeAttribute('isp-value'); 
+                // });
+
             }
             if (data.html) {
                 if (data.meta.scrollTop !== undefined) {

@@ -10,7 +10,7 @@
      *  create iframe for CORS
      **/
     iframe.style.display = 'none';
-    iframe.src = '<%= host %>/iframe';
+    iframe.src = '<%= host %>/client_frame.html';
     iframe.id = '__jsinspector_cors_iframe';
     document.body.appendChild(iframe);
 
@@ -84,8 +84,7 @@
      **/
     function getDocuemnt () {
 
-
-        var doc = document.documentElement.cloneNode(true),
+        var doc = document.documentElement,
             scripts = slice.call(doc.querySelectorAll('script')),
             styleSheets = slice.call(doc.querySelectorAll('link')),
             images = slice.call(doc.querySelectorAll('img')),
@@ -96,13 +95,19 @@
             item.src = "";
         });
         styleSheets.forEach(function (item) {
-            item.setAttribute('href', item.href);
+            if (item.getAttribute('href') !== item.href) {
+                item.setAttribute('href', item.href);
+            }
         });
         images.forEach(function (item) {
-            item.setAttribute('src', item.src);
+            if (item.getAttribute('src') !== item.src) {
+                item.setAttribute('src', item.src);
+            }
         });
         inputs.forEach(function (item) {
-            item.setAttribute('value', item.value);
+            if (item.getAttribute('value') !== item.value) {
+                item.setAttribute('value', item.value);
+            }
         });
         // get document doctype
         var node = document.doctype,
