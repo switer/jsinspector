@@ -35,7 +35,6 @@
     </script>
     <script src="inspector.view.js"></script>
     <script src="inspector.test.js"></script>
-
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io.connect('<%= host %>'),
@@ -44,6 +43,7 @@
             slice = Array.prototype.slice,
             documentBase = '',
             isDocumentInited = false,
+            initRetry = 0,
             jdpInstance = jsondiffpatch.create({
                 textDiff: {
                     maxLength: 60
@@ -72,7 +72,9 @@
                 }
             }
         }
-
+        /**
+         *  Write iframe document
+         **/
         function writeDocument (ispDoc, ispWin, html) {
             ispDoc.open();
             // remove inspector CORS frame src and save dom for Xpath
@@ -97,10 +99,13 @@
             xhr.open('GET', '/inspect_html_init?<%= inspectorId %>')
             xhr.send(null);
         }
-        var retry = 0;
+
+        /**
+         *  Initialize function for get full document text
+         **/
         function initialize () {
-            if (retry > 5) return;
-            retry ++;
+            if (initRetry > 5) return;
+            initRetry ++;
             documentInitialize(function (data) {
                 isDocumentInited = true;
                 documentBase = data.html;
@@ -111,12 +116,14 @@
                 }, 500);
             })
         }
+
         initialize();
-        
+        // receive document sync data
         socket.on('inspect:html:update:<%= inspectorId %>', function (data) {
             data = JSON.parse(data);
             if (isDocumentInited) {
-                // document has not inited 
+                // document has not inited
+                if (data.html) documentBase = data.html;
                 updateInspectorFrame(data);
             } else if (!isDocumentInited && data.html){
                 documentBase = data.html;

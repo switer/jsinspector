@@ -75,17 +75,17 @@ app.get('/devtools', inspectorIdParse, function (req, res) {
     }));
 });
 app.get('/inspect_html_init', inspectorIdParse, function (req, res) {
-        var tmp; 
-        try {
-            tmp = fs.readFileSync('tmp/inspector_html_' + req.inspectorId + '.json', 'utf-8');
-        } catch (e) {
-            console.log('Error ' + e + e.stack);
-        }
-        if (tmp) res.send(tmp);
-        else {
-            res.send(200, '');
-        }
-    });
+    var tmp; 
+    try {
+        tmp = fs.readFileSync('tmp/inspector_html_' + req.inspectorId + '.json', 'utf-8');
+    } catch (e) {
+        console.log('Error ' + e + e.stack);
+    }
+    if (tmp) res.send(tmp);
+    else {
+        res.send(200, '');
+    }
+});
 /* =================================================================== */
 
 
@@ -117,23 +117,25 @@ app.post('/stylesheets', function (req, res) {
 app.post('/html', inspectorIdParse, rawBody, function (req, res) {
     var content = req.rawBody,
         updatedData,
-        lastTmpData;
+        lastTmpData,
+        syncData;
 
-
+    /**
+     *  @html {String}
+     *  @delta {TextDelta}
+     *  @meta {Object}
+     **/
     try {
         lastTmpData = fs.readFileSync('tmp/inspector_html_' + req.inspectorId + '.json', 'utf-8');
         lastTmpData = JSON.parse(lastTmpData);
         updatedData = JSON.parse(content);
+        syncData = JSON.parse(content);
 
         // patching html text
         if (updatedData.delta && !updatedData.html) {
             updatedData.html = jsondiffpatch.patch(lastTmpData.html, updatedData.delta);
-            content = JSON.stringify(updatedData);
-        }
-
-        if (!updatedData.html && lastTmpData.html) {
+        } else if (!updatedData.html) {
             updatedData.html = lastTmpData.html;
-            content = JSON.stringify(updatedData);
         }
 
         lastTmpData = JSON.stringify(updatedData);
@@ -143,7 +145,7 @@ app.post('/html', inspectorIdParse, rawBody, function (req, res) {
     }
 
     fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', lastTmpData || content, 'utf-8');
-    io.sockets.emit('inspect:html:update:' + req.inspectorId, lastTmpData || content);
+    io.sockets.emit('inspect:html:update:' + req.inspectorId, content);
 
     res.send(200);
 });
