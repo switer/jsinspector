@@ -25,6 +25,7 @@
     "socket.io": "^0.9.17",
     "body-parser": "^1.2.0",
     "ejs": "^1.0.0",
-    "compression": "^1.0.2"
+    "compression": "^1.0.2",
+    "jsondiffpatch": "^0.1.5"
   }
 }

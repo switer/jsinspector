@@ -5,6 +5,7 @@
     <title>JSInspector devtools</title>
     <script src="lib/zepto.min.js"></script>
     <script src="lib/vue.min.js"></script>
+    <script src="jsondiffpatch.js"></script>
     <link rel="stylesheet" href="inspector.css">
 </head>
 <body>
@@ -40,7 +41,14 @@
         var socket = io.connect('<%= host %>'),
             inspectorId = '<%= inspectorId %>',
             inspectorFrame = document.querySelector('#inspectorFrame'),
-            slice = Array.prototype.slice;
+            slice = Array.prototype.slice,
+            documentBase = '',
+            isDocumentInited = false,
+            jdpInstance = jsondiffpatch.create({
+                textDiff: {
+                    maxLength: 60
+                }
+            });
 
         /**
          *  update inspected device view
@@ -51,27 +59,13 @@
                 ispWin = inspectorFrame.contentWindow;
 
             if (data.html) {
-                ispDoc.open();
-                // remove inspector CORS frame src and save dom for Xpath
-                data.html = data.html.replace(/<iframe\s*src="[^"]*"\s*id="__jsinspector_cors_iframe"/, 
-                    '<iframe src="" id="__jsinspector_cors_iframe"');
-                ispDoc.write(data.html);
-                ispDoc.close();
-
-                // slice.call(ispDoc.querySelectorAll('link[isp-href]')).forEach(function (item) {
-                //     item.href = item.getAttribute('isp-href');
-                //     item.removeAttribute('isp-href'); 
-                // });
-                // slice.call(ispDoc.querySelectorAll('img[isp-src]')).forEach(function (item) {
-                //     item.src = item.getAttribute('isp-src');
-                //     item.removeAttribute('isp-src'); 
-                // });
-                // slice.call(ispDoc.querySelectorAll('input[isp-value]')).forEach(function (item) {
-                //     item.value = item.getAttribute('isp-value');
-                //     item.removeAttribute('isp-value'); 
-                // });
-
+                documentBase = data.html;
+                writeDocument(ispDoc, ispWin, documentBase);
+            } else if (data.delta) {
+                documentBase = jdpInstance.patch(documentBase, data.delta);
+                writeDocument(ispDoc, ispWin, documentBase);
             }
+
             if (data.html) {
                 if (data.meta.scrollTop !== undefined) {
                     ispWin.scrollTo(0, data.meta.scrollTop);
@@ -79,20 +73,55 @@
             }
         }
 
-        socket.on('connect', function () {
-            // when connect initialize device view with server-side temp data;
-            socket.emit('inspect:html:init', {
-                inspectorId: inspectorId
-            });
-             
-        });
-        // receive init data
-        socket.on('inspect:html:init:<%= inspectorId %>', function (data) {
-            updateInspectorFrame(JSON.parse(data));
-        });
-        // device view update 
+        function writeDocument (ispDoc, ispWin, html) {
+            ispDoc.open();
+            // remove inspector CORS frame src and save dom for Xpath
+            html = html.replace(/<iframe\s*src="[^"]*"\s*id="__jsinspector_cors_iframe"/, 
+                '<iframe src="" id="__jsinspector_cors_iframe"');
+            ispDoc.write(html);
+            ispDoc.close();
+        }
+
+        /**
+         *  comment
+         **/
+        function documentInitialize (success, error) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200 && xhr.responseText) {
+                    success && success(xhr.responseText);
+                } else if (xhr.readyState == 4 && (xhr.status != 200 || !xhr.responseText)) {
+                    error && error();
+                }
+            }
+            xhr.open('GET', '/inspect_html_init?<%= inspectorId %>')
+            xhr.send(null);
+        }
+        var retry = 0;
+        function initialize () {
+            if (retry > 5) return;
+            retry ++;
+            documentInitialize(function (data) {
+                isDocumentInited = true;
+                documentBase = data.html;
+                updateInspectorFrame(JSON.parse(data));
+            }, function () {
+                setTimeout(function() {
+                    initialize();
+                }, 500);
+            })
+        }
+        initialize();
+        
         socket.on('inspect:html:update:<%= inspectorId %>', function (data) {
-            updateInspectorFrame(JSON.parse(data));
+            data = JSON.parse(data);
+            if (isDocumentInited) {
+                // document has not inited 
+                updateInspectorFrame(data);
+            } else if (!isDocumentInited && data.html){
+                documentBase = data.html;
+                updateInspectorFrame(data);
+            }
         });
     </script>
 </body>

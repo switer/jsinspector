@@ -1,11 +1,15 @@
-(function () {
+;(function () {
     var slice = Array.prototype.slice,
         iframe = document.createElement('iframe'),
+        script = document.createElement('script'),
         requestHandlers = {},
-        lastPostHTML = '',
         requestId = 0,
-        inspectorId = '<%= inspectorId %>';
+        inspectorId = '<%= inspectorId %>',
+        lastPostObject,
+        documentIsInited = false;
 
+    script.src="<%= host %>/jsondiffpatch.js";
+    document.body.appendChild(script);
     /**
      *  create iframe for CORS
      **/
@@ -13,6 +17,7 @@
     iframe.src = '<%= host %>/client_frame.html';
     iframe.id = '__jsinspector_cors_iframe';
     document.body.appendChild(iframe);
+
 
     /**
      *  comment
@@ -119,25 +124,47 @@
                         + '>';
 
         return doctype + doc.innerHTML
-        
     }
 
     function postDocument (success, error) {
-        var html = getDocuemnt();
+        var html = getDocuemnt(),
+            delta;
 
-        if (html == lastPostHTML) {
+        var differ = jsondiffpatch.create({
+                textDiff: {
+                    // default 60, minimum string length (left and right sides) 
+                    // to use text diff algorythm: google-diff-match-patch
+                    minLength: 60
+                }
+            });
+
+        // no file changes
+        if (lastPostObject && html == lastPostObject.html) {
             success && success();
             return;
         }
 
-        lastPostHTML = html;
+        if (lastPostObject && documentIsInited) { // has last modify
+            // for minLength condition
+            if (html.length > 60) {
+                delta = differ.diff(lastPostObject.html, html);
+            }
+        } else { // initialize last modify
+            lastPostObject = {
+                uuid: UUID()
+            };
+        }
+
+        lastPostObject.html = html;
 
         $ajax({
             method: 'POST',
             url: '/html?<%= inspectorId %>',
             type: 'text/plain',
             data: JSON.stringify({
-                html: html,
+                uuid: lastPostObject.uuid,
+                html: delta && delta.length < html.length ? '' : html,
+                delta: delta || '',
                 meta: {
                     scrollTop: document.body.scrollTop
                 },
@@ -242,11 +269,72 @@
 
             function postCallback () {
                 postDocument(function () {
+                    documentIsInited = true;
                     setTimeout(postCallback, 300);
-                });
+                }, postCallback);
             }
             postCallback();
             syncMeta();
+            window.addEventListener('hashchange', function () {
+                postDocument();
+            });
         });
     }
+
+    /* =================================================================== */
+    /**
+     *  @https://github.com/LiosK/UUID.js/blob/master/src/uuid.core.js
+     **/
+    function UUID() {
+        var cacheUUID = localStorage.getItem('__js_inspector_uuid__');
+        if (cacheUUID) {
+            return cacheUUID;
+        } else {
+            cacheUUID = UUID.generate();
+            localStorage.setItem('__js_inspector_uuid__', cacheUUID);
+            return cacheUUID;
+        }
+    }
+
+    /**
+     * The simplest function to get an UUID string.
+     * @returns {string} A version 4 UUID string.
+     */
+    UUID.generate = function() {
+      var rand = UUID._gri, hex = UUID._ha;
+      return  hex(rand(32), 8)          // time_low
+            + "-"
+            + hex(rand(16), 4)          // time_mid
+            + "-"
+            + hex(0x4000 | rand(12), 4) // time_hi_and_version
+            + "-"
+            + hex(0x8000 | rand(14), 4) // clock_seq_hi_and_reserved clock_seq_low
+            + "-"
+            + hex(rand(48), 12);        // node
+    };
+
+    /**
+     * Returns an unsigned x-bit random integer.
+     * @param {int} x A positive integer ranging from 0 to 53, inclusive.
+     * @returns {int} An unsigned x-bit random integer (0 <= f(x) < 2^x).
+     */
+    UUID._gri = function(x) { // _getRandomInt
+      if (x <   0) return NaN;
+      if (x <= 30) return (0 | Math.random() * (1 <<      x));
+      if (x <= 53) return (0 | Math.random() * (1 <<     30))
+                        + (0 | Math.random() * (1 << x - 30)) * (1 << 30);
+      return NaN;
+    };
+
+    /**
+     * Converts an integer to a zero-filled hexadecimal string.
+     * @param {int} num
+     * @param {int} length
+     * @returns {string}
+     */
+    UUID._ha = function(num, length) {  // _hexAligner
+      var str = num.toString(16), i = length - str.length, z = "0";
+      for (; i > 0; i >>>= 1, z += z) { if (i & 1) { str = z + str; } }
+      return str;
+    };
 })();
