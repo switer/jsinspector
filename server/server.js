@@ -10,8 +10,6 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     jsondiffpatch = require('jsondiffpatch').create({
         textDiff: {
-            // default 60, minimum string length (left and right sides) 
-            // to use text diff algorythm: google-diff-match-patch
             minLength: 60
         }
     });
@@ -134,18 +132,20 @@ app.post('/html', inspectorIdParse, rawBody, function (req, res) {
         // patching html text
         if (updatedData.delta && !updatedData.html) {
             updatedData.html = jsondiffpatch.patch(lastTmpData.html, updatedData.delta);
+            // full amount release, currently I can't do delta release
+            syncData.html = updatedData.html;
         } else if (!updatedData.html) {
             updatedData.html = lastTmpData.html;
         }
-
+        syncData = JSON.stringify(syncData);
         lastTmpData = JSON.stringify(updatedData);
     } catch (e) {
         lastTmpData = null;
         console.log('Error ' + e + e.stack);
     }
 
-    fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', lastTmpData || content, 'utf-8');
-    io.sockets.emit('inspect:html:update:' + req.inspectorId, content);
+    fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', syncData || content, 'utf-8');
+    io.sockets.emit('inspect:html:update:' + req.inspectorId, syncData || content);
 
     res.send(200);
 });
