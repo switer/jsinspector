@@ -1,8 +1,3 @@
-
-require.register('', function (module, exports, require) {
-    module.exports = 
-});
-
 ;(function () {
     var slice = Array.prototype.slice,
         iframe = document.createElement('iframe'),
