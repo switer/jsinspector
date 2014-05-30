@@ -6,7 +6,10 @@
         requestId = 0,
         inspectorId = '<%= inspectorId %>',
         lastPostObject,
-        documentIsInited = false;
+        documentIsInited = false,
+        baseDocumentData,
+        documentPackets = [],
+        differ;
 
     script.src="<%= host %>/jsondiffpatch.js";
     document.body.appendChild(script);
@@ -130,14 +133,6 @@
         var html = getDocuemnt(),
             delta;
 
-        var differ = jsondiffpatch.create({
-                textDiff: {
-                    // default 60, minimum string length (left and right sides) 
-                    // to use text diff algorythm: google-diff-match-patch
-                    minLength: 60
-                }
-            });
-
         // no file changes
         if (lastPostObject && html == lastPostObject.html) {
             success && success();
@@ -163,7 +158,7 @@
             type: 'text/plain',
             data: JSON.stringify({
                 uuid: lastPostObject.uuid,
-                html: delta && delta.length < html.length ? '' : html,
+                html: delta && (delta.length < html.length) ? '' : html,
                 delta: delta || '',
                 meta: {
                     scrollTop: document.body.scrollTop
@@ -220,7 +215,6 @@
     }
     function $ajax (options, success, error) {
         var id = requestId ++; 
-
         options.id = id;
         iframe.contentWindow.postMessage(options, '*');
 
@@ -233,7 +227,13 @@
         };
     }
     iframe.onload = function () {
-
+        differ = jsondiffpatch.create({
+            textDiff: {
+                // default 60, minimum string length (left and right sides) 
+                // to use text diff algorythm: google-diff-match-patch
+                minLength: 60
+            }
+        })
         /**
          *  receive postMessage response 
          **/
@@ -248,12 +248,124 @@
                 delete handler[event.data.id];
             }
         });
+        /* =================================================================== */
+        /**
+         *  initialize step
+         **/
+        function documentInitalize (done) {
+            var docHTML = getDocuemnt(),
+                uploadData = {
+                    uuid: UUID(),
+                    html: docHTML,
+                    meta: {
+                        scrollTop: document.body.scrollTop
+                    },
+                    inspectorId: inspectorId
+                };
+            documentUpload(uploadData, done);
+        }
 
+        function documentUpload (data, done) {
+            documentPost(data, function () {
+                baseDocumentData = data;
+                done && done();
+            }, function () {
+                documentUpload(data, done);
+            });
+        }
+
+        function documentPost (data, success, error) {
+            $ajax({
+                method: 'POST',
+                url: '/html?<%= inspectorId %>',
+                type: 'text/plain',
+                data: JSON.stringify(data),
+                withId: true
+            }, function () {
+                success && success();
+            }, function () {
+                error && error();
+            });
+        }
+        /* =================================================================== */
+        /**
+         *  delta checking step
+         **/
+        function deltaCheckingStat () {
+            dirtyChecking(function (dataPacket) {
+                // call when check for the delta change
+                console.log(dataPacket);
+
+            });
+            window.addEventListener('hashchange', function () {
+                var dataPacket = genDetalData();
+                if (dataPacket) {
+                    // update base document content
+                    baseDocumentData.html = dataPacket.html;
+                    delete dataPacket.html;
+                    // sync the meta
+                    baseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
+                    // TODO
+                    console.log(dataPacket);
+                }
+            });
+        }
+
+        function dirtyChecking (hasDirtyCallback) {
+            setTimeout(function() {
+                var dataPacket = genDetalData();
+                if (dataPacket) {
+                    // update base document content
+                    baseDocumentData.html = dataPacket.html;
+                    delete dataPacket.html;
+                    // sync the meta
+                    baseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
+                    // dirty checking callback
+                    hasDirtyCallback(dataPacket);
+                }
+                // polling
+                dirtyChecking(hasDirtyCallback);
+            }, 300);
+        }
+        /**
+         *  Generate delata data when has dirty data, else if return null
+         **/
+        function genDetalData () {
+            var checkedDoc = getDocuemnt(),
+                scrollTop = document.body.scrollTop,
+                dirtyDataPacket;
+
+            if (checkedDoc != baseDocumentData.html) {
+                dirtyDataPacket = {
+                    uuid: baseDocumentData.uuid,
+                    html: checkedDoc,
+                    delta: differ.diff(baseDocumentData.html, checkedDoc),
+                    meta: {
+                        scrollTop: scrollTop
+                    },
+                    inspectorId: inspectorId
+                }
+                // dirty checking callback
+                return dirtyDataPacket;
+            }
+            return null;
+        }
+
+        
+        /* =================================================================== */
         /**
          *  replace cross-domain's stylesheets
          **/
         window.addEventListener('load', function () {
-/*            replaceCORSStyleSheet(function () {
+            // document base content initial upload
+            documentInitalize(function () {
+                // delta upload after base document upload done
+                deltaCheckingStat();
+            });
+            // sync the data such as "scrollTop", unless document content
+            syncMeta();
+
+            /*replaceCORSStyleSheet(function () {
                 var matchesRules = getMatchesRules(document.body);
 
                 $ajax({
@@ -267,17 +379,16 @@
                 });
             });*/
 
-            function postCallback () {
-                postDocument(function () {
-                    documentIsInited = true;
-                    setTimeout(postCallback, 300);
-                }, postCallback);
-            }
-            postCallback();
-            syncMeta();
-            window.addEventListener('hashchange', function () {
-                postDocument();
-            });
+            // function postCallback () {
+            //     postDocument(function () {
+            //         documentIsInited = true;
+            //         setTimeout(postCallback, 300);
+            //     }, postCallback);
+            // }
+            // postCallback();
+            // window.addEventListener('hashchange', function () {
+            //     postDocument();
+            // });
         });
     }
 

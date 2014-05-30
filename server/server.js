@@ -15,6 +15,17 @@ var express = require('express'),
     });
 
 /**
+ *  uitl functions
+ **/
+function readFile (path) {
+    if (fs.existsSync(path)) {
+        return fs.readFileSync(path, 'utf-8');
+    } else {
+        return '';
+    }
+}
+
+/**
  *  initialize
  **/
 /* =================================================================== */
@@ -32,10 +43,6 @@ app.use(bodyParser());
  *  GET routes
  **/
 /* =================================================================== */
-app.get('/', function (req, res) {
-    var html = fs.readFileSync('../index.html', 'utf-8');
-    res.send(html);
-});
 app.get('/src', function (req, res) {
     var srcUrl = req.query.url.replace(/"/g, '');
     if (!srcUrl) {
@@ -57,32 +64,24 @@ app.get('/src', function (req, res) {
  *  inspctor script
  **/
 app.get('/inspector', inspectorIdParse, function (req, res) {
-    var script = fs.readFileSync('./script.js', 'utf-8');
+    var script = readFile('./script.js', 'utf-8');
     res.setHeader('Content-type', 'application/javascript');
     res.send(ejs.render(script, {
-        host: 'http://' + req.headers.host,
-        inspectorId: req.inspectorId,
-        dom2json: fs.readFileSync('./public/dom2json.js', 'utf-8')
-    }));
-});
-app.get('/devtools', inspectorIdParse, function (req, res) {
-    var html = fs.readFileSync('./devtools.html', 'utf-8');
-    res.send(ejs.render(html, {
         host: 'http://' + req.headers.host,
         inspectorId: req.inspectorId
     }));
 });
+app.get('/devtools', inspectorIdParse, function (req, res) {
+    var html = fs.readFileSync('./devtools.html', 'utf-8'),
+        host = req.headers.host;
+
+    res.send(ejs.render(html, {
+        host: host.match(/^http\:/) ? host : 'http://' + host,
+        inspectorId: req.inspectorId
+    }));
+});
 app.get('/inspect_html_init', inspectorIdParse, function (req, res) {
-    var tmp; 
-    try {
-        tmp = fs.readFileSync('tmp/inspector_html_' + req.inspectorId + '.json', 'utf-8');
-    } catch (e) {
-        console.log('Error ' + e + e.stack);
-    }
-    if (tmp) res.send(tmp);
-    else {
-        res.send(200, '');
-    }
+    res.send(readFile('tmp/inspector_html_' + req.inspectorId + '.json'));
 });
 /* =================================================================== */
 
@@ -92,7 +91,8 @@ app.get('/inspect_html_init', inspectorIdParse, function (req, res) {
  **/
 /* =================================================================== */
 function inspectorIdParse (req, res, next) {
-    req.inspectorId = url.parse(req.url).search.replace(/^\?/, '').split('&')[0];
+    var search = url.parse(req.url).search;
+    search && (req.inspectorId = search.replace(/^\?/, '').split('&')[0]);
     next();
 }
 
@@ -106,12 +106,6 @@ function rawBody(req, res, next) {
     next();
   });
 }
-app.post('/stylesheets', function (req, res) {
-    io.sockets.emit('inspect:stylesheet:update', {
-        data: JSON.parse(req.body.rules)
-    });
-    res.send(200);
-});
 app.post('/html', inspectorIdParse, rawBody, function (req, res) {
     var content = req.rawBody,
         updatedData,
@@ -128,23 +122,22 @@ app.post('/html', inspectorIdParse, rawBody, function (req, res) {
         lastTmpData = JSON.parse(lastTmpData);
         updatedData = JSON.parse(content);
         syncData = JSON.parse(content);
-
         // patching html text
-        if (updatedData.delta && !updatedData.html) {
+        if (updatedData.delta && !updatedData.html && lastTmpData.html) {
             updatedData.html = jsondiffpatch.patch(lastTmpData.html, updatedData.delta);
             // full amount release, currently I can't do delta release
             syncData.html = updatedData.html;
+            syncData.delta = '';
         } else if (!updatedData.html) {
             updatedData.html = lastTmpData.html;
         }
         syncData = JSON.stringify(syncData);
         lastTmpData = JSON.stringify(updatedData);
     } catch (e) {
-        lastTmpData = null;
         console.log('Error ' + e + e.stack);
     }
 
-    fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', syncData || content, 'utf-8');
+    fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', lastTmpData || content, 'utf-8');
     io.sockets.emit('inspect:html:update:' + req.inspectorId, syncData || content);
 
     res.send(200);

@@ -63,7 +63,7 @@
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     var data = xhr.responseText;
                     options.success && options.success(data, xhr);
-                } else {
+                } else if (xhr.readyState == 4 && xhr.status != 200) {
                     options.error && options.error('', xhr);
                 } 
             }
