@@ -1,18 +1,25 @@
+
+require.register('', function (module, exports, require) {
+    module.exports = 
+});
+
 ;(function () {
     var slice = Array.prototype.slice,
         iframe = document.createElement('iframe'),
         script = document.createElement('script'),
+        inspectorId = '<%= inspectorId %>',
         requestHandlers = {},
         requestId = 0,
-        inspectorId = '<%= inspectorId %>',
-        lastPostObject,
-        documentIsInited = false,
         baseDocumentData,
-        documentPackets = [],
+        dataPacketQueue = [],
         differ;
 
+    /**
+     *  load jsondiffpatch module
+     **/
     script.src="<%= host %>/jsondiffpatch.js";
     document.body.appendChild(script);
+
     /**
      *  create iframe for CORS
      **/
@@ -21,14 +28,7 @@
     iframe.id = '__jsinspector_cors_iframe';
     document.body.appendChild(iframe);
 
-
-    /**
-     *  comment
-     **/
-    function sendStyleRules () {
-        // TODO post inpect data
-    }
-
+    /* =================================================================== */
     function getMatchesRules ($el) {
         var styleSheets = slice.call(document.styleSheets),
             matches = [];
@@ -53,7 +53,6 @@
         }
         return matches;
     }
-
     /**
      *  replace those cross-domain stylesheet
      **/
@@ -127,50 +126,6 @@
                         + '>';
 
         return doctype + doc.innerHTML
-    }
-
-    function postDocument (success, error) {
-        var html = getDocuemnt(),
-            delta;
-
-        // no file changes
-        if (lastPostObject && html == lastPostObject.html) {
-            success && success();
-            return;
-        }
-
-        if (lastPostObject && documentIsInited) { // has last modify
-            // for minLength condition
-            if (html.length > 60) {
-                delta = differ.diff(lastPostObject.html, html);
-            }
-        } else { // initialize last modify
-            lastPostObject = {
-                uuid: UUID()
-            };
-        }
-
-        lastPostObject.html = html;
-
-        $ajax({
-            method: 'POST',
-            url: '/html?<%= inspectorId %>',
-            type: 'text/plain',
-            data: JSON.stringify({
-                uuid: lastPostObject.uuid,
-                html: delta && (delta.length < html.length) ? '' : html,
-                delta: delta || '',
-                meta: {
-                    scrollTop: document.body.scrollTop
-                },
-                inspectorId: inspectorId
-            }),
-            withId: true
-        }, function () {
-            success && success();
-        }, function () {
-            error && error();
-        });
     }
 
     function syncMeta () {
@@ -351,7 +306,43 @@
             return null;
         }
 
-        
+        function sendToQueue (dataPacket) {
+            dataPacketQueue.push(dataPacket);
+            // trigger a event to notify queue manager
+            onDataPacketPush();
+        }
+
+        /* =================================================================== */
+        /**
+         *  queue
+         **/
+        function onDataPacketPush () {
+            if (queueProcessing) {
+                // task queue manager is working now
+                return;
+            } else {
+                queueProcess();
+            }
+        }
+
+        function queueProcess () {
+            queueProcessing = true;
+
+            if (dataPacketQueue.length == 0) {
+                // stop when the queue is empty
+                queueProcess = false;
+                return;
+            }
+            var taskData = dataPacketQueue[0];
+            documentPost(taskData, function () {
+                dataPacketQueue.shift();
+                queueProcess();
+            }, function () {
+                queueProcess();
+            });
+        }
+
+
         /* =================================================================== */
         /**
          *  replace cross-domain's stylesheets
@@ -378,17 +369,6 @@
                     // console.log('success');
                 });
             });*/
-
-            // function postCallback () {
-            //     postDocument(function () {
-            //         documentIsInited = true;
-            //         setTimeout(postCallback, 300);
-            //     }, postCallback);
-            // }
-            // postCallback();
-            // window.addEventListener('hashchange', function () {
-            //     postDocument();
-            // });
         });
     }
 
