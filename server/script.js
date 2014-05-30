@@ -244,8 +244,7 @@
         function deltaCheckingStat () {
             dirtyChecking(function (dataPacket) {
                 // call when check for the delta change
-                console.log(dataPacket);
-
+                sendToQueue(dataPacket);
             });
             window.addEventListener('hashchange', function () {
                 var dataPacket = genDetalData();
@@ -256,7 +255,7 @@
                     // sync the meta
                     baseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
                     // TODO
-                    console.log(dataPacket);
+                    sendToQueue(dataPacket);
                 }
             });
         }
@@ -308,6 +307,8 @@
         }
 
         /* =================================================================== */
+        var queueProcessing = false;
+
         /**
          *  queue
          **/
@@ -321,14 +322,15 @@
         }
 
         function queueProcess () {
-            queueProcessing = true;
-
             if (dataPacketQueue.length == 0) {
                 // stop when the queue is empty
-                queueProcess = false;
+                queueProcessing = false;
                 return;
             }
+            queueProcessing = true;
+
             var taskData = dataPacketQueue[0];
+
             documentPost(taskData, function () {
                 dataPacketQueue.shift();
                 queueProcess();
