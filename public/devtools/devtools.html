@@ -5,13 +5,14 @@
     <title>JSInspector devtools</title>
     <script src="../jsondiffpatch.js"></script>
     <style>
-        body {margin: 0;display: -webkit-box;height: 100%;position: absolute;width: 100%;}
+        body {margin: 0;display: -webkit-box;display: box;display: -ms-box;height: auto;position: relative;width: 100%;
+            overflow:auto;-webkit-overflow-scrolling:touch;}
         #inspectedWindow {display: block;-webkit-box-flex:1;}
     </style>
 </head>
 <body>
     <!-- inpsctor inspected device view frame -->
-    <iframe src="about:blank" frameborder="0" id="inspectedWindow" ></iframe>
+    <iframe src="about:blank" frameborder="0" scrolling="no" id="inspectedWindow" ></iframe>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         <%- devtools %>

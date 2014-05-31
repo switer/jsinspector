@@ -11,6 +11,9 @@
             }
         });
 
+    function updateFrameHeight () {
+        inspectedWindow.style.height = inspectedWindow.contentDocument.body.scrollHeight + 'px';
+    }
     /**
      *  update inspected device view
      **/
@@ -26,10 +29,10 @@
             documentBase = jdpInstance.patch(documentBase, data.delta);
             writeDocument(ispDoc, ispWin, documentBase);
         }
-
+        updateFrameHeight();
         if (data.meta.scrollTop !== undefined) {
             // update some metas only
-            ispWin.scrollTo(0, data.meta.scrollTop);
+            window.scrollTo(0, data.meta.scrollTop);
         }
     }
     /**
@@ -81,16 +84,7 @@
             // receive document sync data
             socket.on('inspected:html:update:<%= inspectorId %>', function (data) {
                 data = JSON.parse(data);
-
-                if (data.delta && isDocumentInited) {
-                    // document has inited
-                    updateinspectedWindow(data);
-                } else if (!isDocumentInited && data.html){
-                    documentBase = data.html;
-                    updateinspectedWindow(data);
-                } else if (!data.delta && !data.html) {
-                    updateinspectedWindow(data);
-                }
+                updateinspectedWindow(data);
             });
 
         }, function (err, xhr) {
@@ -98,15 +92,17 @@
                 alert(err);
             } else if (retryTimes >= MAX_RETRY_TIMES) {
                 alert(err);
-            } else if (!isDocumentInited) {
-                 initialize();
+            } else {
+                initialize();
             }
         });
     }
+
     /**
      *  initialize after window load
      **/
     window.addEventListener('load', function () {
+        updateFrameHeight();
         initialize();
     });
 })();
