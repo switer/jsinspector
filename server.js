@@ -64,7 +64,7 @@ app.get('/src', function (req, res) {
  *  inspctor script
  **/
 app.get('/inspector', inspectorIdParse, function (req, res) {
-    var script = readFile('./script.js', 'utf-8');
+    var script = readFile('./public/client/script.js', 'utf-8');
     res.setHeader('Content-type', 'application/javascript');
     res.send(ejs.render(script, {
         host: 'http://' + req.headers.host,
@@ -72,7 +72,7 @@ app.get('/inspector', inspectorIdParse, function (req, res) {
     }));
 });
 app.get('/devtools', inspectorIdParse, function (req, res) {
-    var html = fs.readFileSync('./devtools.html', 'utf-8'),
+    var html = fs.readFileSync('./public/devtools/devtools.html', 'utf-8'),
         host = req.headers.host;
 
     res.send(ejs.render(html, {
@@ -108,9 +108,9 @@ function rawBody(req, res, next) {
 }
 app.post('/html', inspectorIdParse, rawBody, function (req, res) {
     var content = req.rawBody,
-        updatedData,
-        lastTmpData,
-        syncData;
+        updatedData, // currently upload data
+        lastTmpData, // last time update data
+        syncData; // sync the data for devtool
 
     /**
      *  @html {String}
