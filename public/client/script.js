@@ -207,6 +207,9 @@
                 return ssid;
             }
         }
+        SSID.get = function () {
+            return sessionStorage.getItem('__js_inspector_ssid__');
+        }
 
         function documentUpload (data, callback) {
             initPost(data, function () {
@@ -305,7 +308,7 @@
         }
 
         function sendToQueue (dataPacket) {
-            var ssid = sessionStorage.getItem('__js_inspector_ssid__');
+            var ssid = SSID.get();
             if (ssid) {
                 dataPacket.ssid = ssid;
                 dataPacketQueue.push(dataPacket);

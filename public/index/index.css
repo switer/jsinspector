@@ -1,0 +1,36 @@
+/*#1f8dd6*/
+html {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
+body {margin: 0;}
+
+.hero {line-height: 200px; color: #1f8dd6;font-size: 500%;text-align: center;font-weight: 100;
+    font-family: cursive;}
+.hero-desc {text-align: center; color: #666;font-size: 120%;line-height: 30px;margin: 20px 0;}
+    .hero-desc p {display: block;margin: auto;max-width: 700px;}
+
+.buttons {text-align: center;margin-top: 30px;margin-bottom: 100px;}
+    .button-secondary {background: #fff;color: #666;border: 1px solid #ddd;}
+    .button-large {font-size: 120%;margin: 0.5em;}
+
+
+.head h3 {max-width: 662px;margin: 10px auto;margin-top: 30px;}
+/**
+ *  Code styles
+ **/
+code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #757575;text-align: center;
+    padding: 20px 10px;display: block;border: 1px solid #eee;background: rgb(250, 250, 250);
+    border-left: 0;border-right: 0;}
+    .tag {color: #1f8dd6;}
+    .string {color: #3b8bba;}
+
+.footer {text-align: center;background-color: #1f8dd6;color: white;line-height: 35px;padding-top: 80px;
+    padding-bottom: 50px;font-size: 100%}
+    .footer a {color: white;text-decoration: underline;}
+
+@media (max-width: 600px) {
+    .hero {font-size: 300%;line-height: 130px;}
+    .hero-desc {line-height: 20px;font-size: 0px;text-align: left;}
+        .hero-desc p {display: inline-block;width: 50%;font-size: 12px;display: inline;}
+    code {text-align: left;font-size: 90%;}
+    .button-large {font-size: 100%;}
+    .footer {font-size: 90%;padding-top: 50px;padding-bottom: 30px;}
+}
