@@ -24,7 +24,13 @@
                         event.source.postMessage({
                             id: options.id,
                             data: data,
-                            status: xhr.status
+                            xhr: {
+                                statusText: xhr.statusText, 
+                                status: xhr.status,
+                                response: xhr.response,
+                                responseText: xhr.responseText, 
+                                statusText: xhr.statusText
+                            }
                         }, '*');
                     }
                 });
@@ -38,14 +44,26 @@
                         event.source.postMessage({
                             id: options.id,
                             data: data,
-                            status: xhr.status
+                            xhr: {
+                                statusText: xhr.statusText, 
+                                status: xhr.status,
+                                response: xhr.response,
+                                responseText: xhr.responseText, 
+                                statusText: xhr.statusText
+                            }
                         }, '*');
                     },
                     error: function (err, xhr) {
                         event.source.postMessage({
                             id: options.id,
-                            error: err,
-                            status: xhr.status
+                            error: err || xhr.response,
+                            xhr: {
+                                statusText: xhr.statusText, 
+                                status: xhr.status,
+                                response: xhr.response,
+                                responseText: xhr.responseText, 
+                                statusText: xhr.statusText
+                            }
                         }, '*');
                     }
                 });                

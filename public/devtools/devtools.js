@@ -63,7 +63,7 @@
                 error && error();
             }
         }
-        xhr.open('GET', '/inspect_html_init?<%= inspectorId %>');
+        xhr.open('GET', '/devtools/init?<%= inspectorId %>');
         xhr.send(null);
     }
     /**
@@ -76,7 +76,7 @@
             updateinspectedWindow(JSON.parse(data));
 
             // receive document sync data
-            socket.on('inspect:html:update:<%= inspectorId %>', function (data) {
+            socket.on('inspected:html:update:<%= inspectorId %>', function (data) {
                 data = JSON.parse(data);
 
                 if (isDocumentInited) {

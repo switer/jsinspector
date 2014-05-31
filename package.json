@@ -28,6 +28,7 @@
     "body-parser": "^1.2.0",
     "ejs": "^1.0.0",
     "compression": "^1.0.2",
-    "jsondiffpatch": "^0.1.5"
+    "jsondiffpatch": "^0.1.5",
+    "cookie-parser": "^1.1.0"
   }
 }

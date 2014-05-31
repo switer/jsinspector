@@ -144,7 +144,7 @@
          **/
         requestHandlers[id] = {
             success: function (data) {
-                success(data.data);
+                success(data);
             },
             error: error
         };
@@ -174,14 +174,16 @@
          *  receive postMessage response 
          **/
         window.addEventListener('message', function (event) {
-            var handler;
-            if (handler = requestHandlers[event.data.id]) {
-                if (event.data.status == 200) {
-                    handler.success &&　handler.success(event.data);
+            var handler,
+                data = event.data;
+
+            if (handler = requestHandlers[data.id]) {
+                if (data.xhr.status == 200) {
+                    handler.success &&　handler.success(data.data, data.xhr);
                 } else {
-                    handler.error && handler.error();                
+                    handler.error && handler.error(data.error, data.xhr);                
                 }
-                delete handler[event.data.id];
+                delete handler[data.id];
             }
         });
         /* =================================================================== */
@@ -191,6 +193,7 @@
         function documentInitalize (done) {
             var docHTML = getDocuemnt(),
                 uploadData = {
+                    ssid: SSID(),
                     uuid: UUID(),
                     html: docHTML,
                     meta: {
@@ -198,36 +201,45 @@
                     },
                     inspectorId: inspectorId
                 };
-            documentUpload(uploadData, done);
-        }
 
-        function documentUpload (data, done) {
-            documentPost(data, function () {
-                baseDocumentData = data;
+            documentUpload(uploadData, function () {
                 done && done();
-            }, function () {
-                documentUpload(data, done);
             });
         }
 
-        function documentPost (data, success, error) {
+        function SSID () {
+            var ssid = sessionStorage.getItem('__js_inspector_ssid__');
+            if (ssid) {
+                return ssid;
+            } else {
+                ssid = UUID.generate();
+                sessionStorage.setItem('__js_inspector_ssid__', ssid);
+                return ssid;
+            }
+        }
+
+        function documentUpload (data, callback) {
+            initPost(data, function () {
+                baseDocumentData = data;
+                callback && callback();
+            }, function () {
+                documentUpload(data, callback);
+            });
+        }
+
+        function initPost (data, success, error) {
             $ajax({
                 method: 'POST',
-                url: '/html?<%= inspectorId %>',
+                url: '/html/init?<%= inspectorId %>',
                 type: 'text/plain',
                 data: JSON.stringify(data),
-                withId: true
-            }, function () {
-                success && success();
-            }, function () {
-                error && error();
-            });
+            }, success, error);
         }
         /* =================================================================== */
         /**
          *  delta checking step
          **/
-        function deltaCheckingStat () {
+        function deltaCheckingStart () {
             dirtyChecking(function (dataPacket) {
                 // call when check for the delta change
                 sendToQueue(dataPacket);
@@ -295,10 +307,28 @@
             return null;
         }
 
+        function deltaPost (data, success, error) {
+            $ajax({
+                method: 'POST',
+                url: '/html/delta?<%= inspectorId %>',
+                type: 'text/plain',
+                data: JSON.stringify(data),
+            }, success, error);
+        }
+
         function sendToQueue (dataPacket) {
-            dataPacketQueue.push(dataPacket);
-            // trigger a event to notify queue manager
-            onDataPacketPush();
+            var ssid = sessionStorage.getItem('__js_inspector_ssid__');
+            if (ssid) {
+                dataPacket.ssid = ssid;
+                dataPacketQueue.push(dataPacket);
+                // trigger a event to notify queue manager
+                onDataPacketPush();
+            } else {
+                dataPacketQueue = [];
+                documentInitalize(function () {
+                    // TODO
+                });
+            }
         }
 
         /* =================================================================== */
@@ -316,6 +346,9 @@
             }
         }
 
+        var MAX_RETRY_TIMES = 5,
+            retryTimes = 0;
+
         function queueProcess () {
             if (dataPacketQueue.length == 0) {
                 // stop when the queue is empty
@@ -326,11 +359,22 @@
 
             var taskData = dataPacketQueue[0];
 
-            documentPost(taskData, function () {
+            deltaPost(taskData, function () {
+                // reset retry time
+                retryTimes = 0;
+
                 dataPacketQueue.shift();
                 queueProcess();
-            }, function () {
-                queueProcess();
+            }, function (err, xhr) {
+
+                if (xhr.status == 400) { // session is out of date
+                    alert(err);
+                } else if (retryTimes >= MAX_RETRY_TIMES) { // max retry times
+                    alert(err || 'network error!');
+                } else { // retry
+                    retryTimes ++;
+                    queueProcess();
+                }
             });
         }
 
@@ -343,7 +387,7 @@
             // document base content initial upload
             documentInitalize(function () {
                 // delta upload after base document upload done
-                deltaCheckingStat();
+                deltaCheckingStart();
             });
             // sync the data such as "scrollTop", unless document content
 
