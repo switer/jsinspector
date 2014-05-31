@@ -173,6 +173,10 @@ app.post('/html/delta', inspectorIdParse, rawBody, function (req, res) {
 /**
  *  Inspctor routes
  **/
+app.get('/', function (req, res, next) {
+    var search = url.parse(req.url).search;
+    res.redirect('/devtools' + (search || ''));
+});
 app.get('/devtools', inspectorIdParse, function (req, res, next) {
     if (!req.inspectorId) {
         res.send(200, 'Create a inspector id ?');
