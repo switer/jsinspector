@@ -117,7 +117,7 @@ app.post('/html/init', inspectorIdParse, rawBody, function (req, res) {
      **/
     fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', content, 'utf-8');
     io.sockets.emit('inspected:html:update:' + req.inspectorId, content);
-    res.send(200);
+    res.send(200, 'ok');
 });
 app.post('/html/delta', inspectorIdParse, rawBody, function (req, res) {
     var content = req.rawBody,
@@ -144,12 +144,12 @@ app.post('/html/delta', inspectorIdParse, rawBody, function (req, res) {
     // patching html text
     if (updatedData.delta && !updatedData.html && lastTmpData.html) {
 
-        // full amount release, currently I can't do delta release
+        // full amount release, currently I can't support delta release
         updatedData.html = jsondiffpatch.patch(lastTmpData.html, updatedData.delta);
         syncData.html = updatedData.html;
-        syncData.delta = '';
+        delete syncData.delta;
 
-    } else if (!updatedData.html) {
+    } else if (!updatedData.html && lastTmpData.html) {
         // match when receive the data packet only the meta
         updatedData.html = lastTmpData.html;
     }
@@ -166,14 +166,18 @@ app.post('/html/delta', inspectorIdParse, rawBody, function (req, res) {
      **/
     io.sockets.emit('inspected:html:update:' + req.inspectorId, syncData);
 
-    res.send(200);
+    res.send(200, 'ok');
 });
 
 /* =================================================================== */
 /**
  *  Inspctor routes
  **/
-app.get('/devtools', inspectorIdParse, function (req, res) {
+app.get('/devtools', inspectorIdParse, function (req, res, next) {
+    if (!req.inspectorId) {
+        res.send(200, 'Create a inspector id ?');
+        return;
+    }
     var html = fs.readFileSync('./public/devtools/devtools.html', 'utf-8'),
         script = fs.readFileSync('./public/devtools/devtools.js', 'utf-8'),
         host = req.headers.host;
@@ -188,7 +192,12 @@ app.get('/devtools', inspectorIdParse, function (req, res) {
     }));
 });
 app.get('/devtools/init', inspectorIdParse, function (req, res) {
-    res.send(readFile('tmp/inspector_html_' + req.inspectorId + '.json'));
+    var file = readFile('tmp/inspector_html_' + req.inspectorId + '.json');
+    if (file) {
+        res.send(file);
+    } else {
+        res.send(404, 'Please inject the script to your code !')
+    }
 });
 
 /* =================================================================== */

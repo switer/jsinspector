@@ -163,13 +163,6 @@
         };
     }
     iframe.onload = function () {
-        differ = jsondiffpatch.create({
-            textDiff: {
-                // default 60, minimum string length (left and right sides) 
-                // to use text diff algorythm: google-diff-match-patch
-                minLength: 60
-            }
-        })
         /**
          *  receive postMessage response 
          **/
@@ -194,7 +187,6 @@
             var docHTML = getDocuemnt(),
                 uploadData = {
                     ssid: SSID(),
-                    uuid: UUID(),
                     html: docHTML,
                     meta: {
                         scrollTop: document.body.scrollTop
@@ -202,9 +194,7 @@
                     inspectorId: inspectorId
                 };
 
-            documentUpload(uploadData, function () {
-                done && done();
-            });
+            documentUpload(uploadData, done);
         }
 
         function SSID () {
@@ -288,16 +278,14 @@
          **/
         function genDetalData () {
             var checkedDoc = getDocuemnt(),
-                scrollTop = document.body.scrollTop,
                 dirtyDataPacket;
 
             if (checkedDoc != baseDocumentData.html) {
                 dirtyDataPacket = {
-                    uuid: baseDocumentData.uuid,
                     html: checkedDoc,
                     delta: differ.diff(baseDocumentData.html, checkedDoc),
                     meta: {
-                        scrollTop: scrollTop
+                        scrollTop: document.body.scrollTop
                     },
                     inspectorId: inspectorId
                 }
@@ -384,6 +372,13 @@
          *  replace cross-domain's stylesheets
          **/
         window.addEventListener('load', function () {
+            differ = jsondiffpatch.create({
+                textDiff: {
+                    // default 60, minimum string length (left and right sides) 
+                    // to use text diff algorythm: google-diff-match-patch
+                    minLength: 60
+                }
+            });
             // document base content initial upload
             documentInitalize(function () {
                 // delta upload after base document upload done

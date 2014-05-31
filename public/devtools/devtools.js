@@ -58,9 +58,9 @@
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200 && xhr.responseText) {
-                success && success(xhr.responseText);
-            } else if (xhr.readyState == 4 && (xhr.status != 200 || !xhr.responseText)) {
-                error && error();
+                success && success(xhr.responseText, xhr);
+            } else if (xhr.readyState == 4 && xhr.status != 200) {
+                error && error(xhr.response, xhr);
             }
         }
         xhr.open('GET', '/devtools/init?<%= inspectorId %>');
@@ -69,6 +69,9 @@
     /**
      *  Initialize function for get full document text
      **/
+    var MAX_RETRY_TIMES = 5,
+        retryTimes = 0;
+
     function initialize () {
         getInitDocument (function (data) {
             isDocumentInited = true;
@@ -79,9 +82,8 @@
             socket.on('inspected:html:update:<%= inspectorId %>', function (data) {
                 data = JSON.parse(data);
 
-                if (isDocumentInited) {
-                    // document has not inited
-                    if (data.html) documentBase = data.html;
+                if (data.delta && isDocumentInited) {
+                    // document has inited
                     updateinspectedWindow(data);
                 } else if (!isDocumentInited && data.html){
                     documentBase = data.html;
@@ -91,8 +93,14 @@
                 }
             });
 
-        }, function () {
-            if (!isDocumentInited) initialize();
+        }, function (err, xhr) {
+            if (xhr.status == 404) {
+                alert(err);
+            } else if (retryTimes >= MAX_RETRY_TIMES) {
+                alert(err);
+            } else if (!isDocumentInited) {
+                 initialize();
+            }
         });
     }
     /**
