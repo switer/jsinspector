@@ -73,11 +73,16 @@ app.get('/inspector', inspectorIdParse, function (req, res) {
 });
 app.get('/devtools', inspectorIdParse, function (req, res) {
     var html = fs.readFileSync('./public/devtools/devtools.html', 'utf-8'),
+        script = fs.readFileSync('./public/devtools/devtools.js', 'utf-8'),
         host = req.headers.host;
 
-    res.send(ejs.render(html, {
+    script = ejs.render(script, {
         host: host.match(/^http\:/) ? host : 'http://' + host,
         inspectorId: req.inspectorId
+    });
+    
+    res.send(ejs.render(html, {
+        devtools: script
     }));
 });
 app.get('/inspect_html_init', inspectorIdParse, function (req, res) {
