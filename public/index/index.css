@@ -31,15 +31,25 @@ body {margin: 0;}
 /**
  *  Code styles
  **/
-.code {text-align: center;}
+.code {text-align: center;margin: auto;}
 code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #757575;text-align: center;
-    padding: 20px 10px;border-left: 3px solid #1f8dd6;background: rgb(245, 251, 253);
-    margin: auto;vertical-align: top;display: block;}
+    padding: 20px 30px;border-left: 3px solid #1f8dd6;background: rgb(245, 251, 253);
+    margin: auto;vertical-align: top;display: inline-block;}
     .tag {color: #EC008E;}
-    .string {color: #3b8bba;}
+    .string {color: #878D3B;}
     .attr {color: rgb(255, 130, 47);}
     .tagname {color: rgb(60, 86, 224);}
     .tagclose {color: rgb(103, 246, 36);}
+    .inspid {color: blue;}
+
+
+.docs {text-align: center;}
+.start {width: 700px;border-bottom: 1px solid #eee;line-height: 120px;position: relative;margin: auto;
+    color: rgb(119, 119, 119);color: #666;}
+    .start h1 {font-size: 250%;line-height: 50px;}
+    .start h4 {font-size: 110%;line-height: 30px;}
+.step {border-left: 3px solid #1f8dd6;width: 600px;background-color: white;display: inline-block;text-align: left;
+    }
 
 .footer {text-align: center;background-color: #1f8dd6;color: white;line-height: 35px;padding-top: 50px;
     padding-bottom: 70px;font-size: 100%}

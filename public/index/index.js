@@ -32,6 +32,8 @@
                         .replace(/\/([a-zA-Z]+?)&gt;/g, '<span class="tagclose">/</span><span class="tagname">$1</span>&gt;')
                         .replace(/&lt;/g, '<span class="tag">&lt;</span>')
                         .replace(/&gt;/g, '<span class="tag">&gt;</span>')
+                         // inspector highligt
+                        .replace(/\?([a-zA-Z0-9]+)\-([a-zA-Z0-9]+)/g, '<span class="inspid">?$1-$2</span>')
 
         $scriptContainer.innerHTML = code;
     }

@@ -29,6 +29,10 @@
     "ejs": "^1.0.0",
     "compression": "^1.0.2",
     "jsondiffpatch": "^0.1.5",
-    "cookie-parser": "^1.1.0"
+    "cookie-parser": "^1.1.0",
+    "logfmt": "^1.1.2"
+  },
+  "engines": {
+    "node": "0.10.x"
   }
 }
