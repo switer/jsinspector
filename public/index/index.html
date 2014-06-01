@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="favicon.ico" rel="icon" type="image/x-icon" />
     <title>JS Web Inspector</title>
     <link rel="stylesheet" href="./pure-min.css">
     <link rel="stylesheet" href="./index.css">
@@ -15,18 +16,31 @@
     </div>
     <div class="head">
         <h3>Inject the code to your website:</h3>
+        <a class="pure-button button-new" href="javascript:;" id="createButton">Create another</a>
     </div>
-    <code class="script" id="script"></code>
+    <div class="code">
+        <code class="script" id="script"></code>
+    </div>
     <p class="buttons">
-        <a class="pure-button pure-button-primary button-large" href="javascript:gotoInspector();">Goto Inspector</a>
-        <a class="pure-button button-secondary button-large" href="http://github.com/switer/jsinspector">
+        <a class="pure-button pure-button-primary button-large" href="#" id="devtoolsButton" target="_blank">
+            Goto Inspector
+        </a>
+        <a class="pure-button button-secondary button-large" href="http://github.com/switer/jsinspector" target="_blank">
             View On Github
         </a>
     </p>
     <div class="footer">
-        <div>JSInspector Project is under the <a href="http://opensource.org/licenses/MIT">MIT Licence</a></div>
+        <div>JSInspector Project is under the <a href="http://opensource.org/licenses/MIT">MIT License</a></div>
         <div>Copyright (c) 2014 <a href="http://github.com/switer">switer</a></div>
     </div>
     <script src="./index.js"></script>
+    <div class="rainbow flb-box">
+        <div class="item flb-p1"></div>
+        <div class="item flb-p1"></div>
+        <div class="item flb-p1"></div>
+        <div class="item flb-p1"></div>
+        <div class="item flb-p1"></div>
+        <div class="item flb-p1"></div>
+    </div>
 </body>
 </html>

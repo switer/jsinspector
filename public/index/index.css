@@ -2,6 +2,9 @@
 html {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
 body {margin: 0;}
 
+.flb-box {display: box;display: -webkit-box;display: -ms-box;display: -o-box;display: -moz-box;}
+    .flb-p1 {-webkit-box-flex: 1; -ms-fex:1; box-flex:1; flex:1;}
+
 .hero {line-height: 200px; color: #1f8dd6;font-size: 500%;text-align: center;font-weight: 100;
     font-family: cursive;}
 .hero-desc {text-align: center; color: #666;font-size: 120%;line-height: 30px;margin: 20px 0;}
@@ -10,26 +13,41 @@ body {margin: 0;}
 .buttons {text-align: center;margin-top: 30px;margin-bottom: 100px;}
     .button-secondary {background: #fff;color: #666;border: 1px solid #ddd;}
     .button-large {font-size: 120%;margin: 0.5em;}
+    .button-new {background: #fff;color: #1f8dd6;}
 
+.head {text-align: left;max-width: 662px;position: relative;margin: auto;}
+.head h3 {margin: 20px auto;margin-top: 30px;display: inline-block;}
 
-.head h3 {max-width: 662px;margin: 10px auto;margin-top: 30px;}
+.rainbow .item {border-top:50px solid;}
+    .rainbow .item:nth-child(1){border-color: #51DD4C;}
+    .rainbow .item:nth-child(2){border-color: rgb(80, 28, 192);}
+    .rainbow .item:nth-child(3){border-color: rgb(250, 242, 50);}
+    .rainbow .item:nth-child(4){border-color: #DD160F;}
+    .rainbow .item:nth-child(5){border-color: rgb(245, 172, 42);}
+    .rainbow .item:nth-child(6){border-color: rgb(29, 226, 243);}}
+
 /**
  *  Code styles
  **/
+.code {text-align: center;}
 code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #757575;text-align: center;
-    padding: 20px 10px;display: block;border: 1px solid #eee;background: rgb(250, 250, 250);
-    border-left: 0;border-right: 0;}
-    .tag {color: #1f8dd6;}
+    padding: 20px 10px;border-left: 3px solid #1f8dd6;background: rgb(245, 251, 253);
+    margin: auto;vertical-align: top;display: block;}
+    .tag {color: #EC008E;}
     .string {color: #3b8bba;}
+    .attr {color: rgb(255, 130, 47);}
+    .tagname {color: rgb(60, 86, 224);}
+    .tagclose {color: rgb(103, 246, 36);}
 
-.footer {text-align: center;background-color: #1f8dd6;color: white;line-height: 35px;padding-top: 80px;
-    padding-bottom: 50px;font-size: 100%}
+.footer {text-align: center;background-color: #1f8dd6;color: white;line-height: 35px;padding-top: 50px;
+    padding-bottom: 70px;font-size: 100%}
     .footer a {color: white;text-decoration: underline;}
 
 @media (max-width: 600px) {
     .hero {font-size: 300%;line-height: 130px;}
     .hero-desc {line-height: 20px;font-size: 0px;text-align: left;}
         .hero-desc p {display: inline-block;width: 50%;font-size: 12px;display: inline;}
+    .head h3 {font-size: 100%;}
     code {text-align: left;font-size: 90%;}
     .button-large {font-size: 100%;}
     .footer {font-size: 90%;padding-top: 50px;padding-bottom: 30px;}
