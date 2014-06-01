@@ -180,7 +180,6 @@ app.get('/', function (req, res, next) {
 });
 app.get('/devtools', inspectorIdParse, function (req, res, next) {
     if (!req.inspectorId) {
-        console.log('----');
         res.redirect('/');
         return;
     }
