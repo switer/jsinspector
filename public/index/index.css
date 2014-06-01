@@ -9,20 +9,22 @@ body {margin: 0;}
 
 .flb-box {display: box;display: -webkit-box;display: -ms-box;display: -o-box;display: -moz-box;}
     .flb-p1 {-webkit-box-flex: 1; -ms-fex:1; box-flex:1; flex:1;}
+.ta-c {text-align: center;}
+.ta-l {text-align: left;}
 
-.hero {line-height: 200px;font-size: 500%;text-align: center;font-weight: 100;
-    font-family: cursive;}
-    .hero a { color: #1f8dd6;text-decoration: none;}
-.hero-desc {text-align: center; color: #666;font-size: 120%;line-height: 30px;margin: 20px 0;}
-    .hero-desc p {display: block;margin: auto;max-width: 700px;}
+.hero {text-align: center;width: 700px;margin: auto;}
+    .hero-title {line-height: 200px;font-size: 500%;font-weight: 100;
+        font-family: cursive;color: #1f8dd6;text-decoration: none;display: inline-block;}
+    .hero-desc {text-align: center; color: #666;font-size: 120%;line-height: 30px;margin: 20px 0;}
+        .hero-desc p {display: block;margin: auto;}
 
-.buttons {text-align: center;margin-top: 30px;margin-bottom: 100px;}
+.buttons {text-align: center;margin-top: 30px;margin-bottom: 80px;}
     .button-secondary {background: #fff;color: #666;border: 1px solid #ddd;}
     .button-large {font-size: 120%;margin: 0.5em;}
     .button-new {background: #fff;color: #1f8dd6;}
 
-.head {text-align: left;max-width: 662px;position: relative;margin: auto;}
-.head h3 {margin: 20px auto;margin-top: 30px;display: inline-block;}
+.head {text-align: left;}
+.head h3 {margin: 20px auto;margin-top: 30px;display: inline-block;font-family: Monaco,'Courier New', monospace, proxima-nova;}
 
 .rainbow .item {border-top:50px solid;}
     .rainbow .item:nth-child(1){border-color: #51DD4C;}
@@ -36,10 +38,9 @@ body {margin: 0;}
 /**
  *  Code styles
  **/
-.code {text-align: center;margin: auto;}
-code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #757575;text-align: center;
-    padding: 20px 30px;border-left: 3px solid #1f8dd6;background: rgb(245, 251, 253);
-    margin: auto;vertical-align: top;display: inline-block;}
+code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #757575;
+    padding: 10px 30px;border-left: 3px solid #1f8dd6;background: rgb(245, 251, 253);
+    margin: auto;vertical-align: top;display: block;line-height: 40px;}
     .tag {color: #EC008E;}
     .string {color: #878D3B;}
     .attr {color: rgb(255, 130, 47);}
@@ -48,25 +49,25 @@ code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #75757
     .inspid {color: blue;}
 
 
-.docs {text-align: center;}
-    .doc-title {font-size: 250%;}
-
-.start {width: 700px;border-bottom: 1px solid #eee;line-height: 120px;position: relative;margin: auto;
-    color: rgb(119, 119, 119);color: #666;}
-    .start h1 {font-size: 250%;line-height: 50px;}
-    .start h4 {font-size: 110%;line-height: 30px;}
-.step {border-left: 3px solid #1f8dd6;width: 600px;background-color: white;display: inline-block;text-align: left;
-    }
+.docs {text-align: center;width: 700px;margin: auto;margin-bottom: 100px;}
+    .start {border-bottom: 1px solid #eee;position: relative;margin: auto;
+        color: rgb(119, 119, 119);color: #666;}
+        .start-title {font-size: 250%;line-height: 80px;}
+        .start-subtitle {font-size: 110%;line-height: 40px;}
+.doc-title {font-size: 150%;line-height: 80px;text-align: left;color: #888;margin-top: 20px;}
+.doc-desc {line-height: 40px;text-align: left;color: rgb(119, 119, 119);margin-bottom: 10px;}
+.doc-hl {color: #1f8dd6;}
 
 .footer {text-align: center;background-color: #1f8dd6;color: white;line-height: 35px;padding-top: 50px;
     padding-bottom: 70px;font-size: 100%}
     .footer a {color: white;text-decoration: underline;}
 
-@media (max-width: 600px) {
-    .hero {font-size: 300%;line-height: 130px;}
-    .hero-desc {line-height: 20px;font-size: 0px;text-align: left;}
-        .hero-desc p {display: inline-block;width: 50%;font-size: 12px;display: inline;}
-    .head h3 {font-size: 100%;}
+@media (max-width: 700px) {
+    .hero {width: auto;}
+        .hero-title {font-size: 300%;line-height: 130px;}
+        .hero-desc {line-height: 20px;font-size: 0px;text-align: left;padding: 0 10px;}
+            .hero-desc p {display: inline-block;width: 50%;font-size: 14px;display: inline;}
+    .head h3 {font-size: 100%;margin-top: 0px;}
     code {text-align: left;font-size: 90%;}
     .button-large {font-size: 100%;}
     .footer {font-size: 90%;padding-top: 50px;padding-bottom: 30px;}
