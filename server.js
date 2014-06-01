@@ -175,10 +175,12 @@ app.post('/html/delta', inspectorIdParse, rawBody, function (req, res) {
  *  Inspctor routes
  **/
 app.get('/', function (req, res, next) {
-    res.send(200, 'Create a inspector id ?');
+    var index = fs.readFileSync('./public/index/index.html', 'utf-8');
+    res.send(200, ejs.render(index, {}));
 });
 app.get('/devtools', inspectorIdParse, function (req, res, next) {
     if (!req.inspectorId) {
+        console.log('----');
         res.redirect('/');
         return;
     }

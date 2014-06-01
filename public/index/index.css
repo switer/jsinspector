@@ -1,6 +1,11 @@
 /*#1f8dd6*/
-html {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
+html {font-family: proxima-nova, Consolas, 'Liberation Mono', Courier, monospace;}
 body {margin: 0;}
+
+ @font-face {
+    font-family: "proxima-nova";
+    src: url("./ProximaNova-Light.otf");
+}
 
 .flb-box {display: box;display: -webkit-box;display: -ms-box;display: -o-box;display: -moz-box;}
     .flb-p1 {-webkit-box-flex: 1; -ms-fex:1; box-flex:1; flex:1;}
@@ -44,6 +49,8 @@ code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #75757
 
 
 .docs {text-align: center;}
+    .doc-title {font-size: 250%;}
+
 .start {width: 700px;border-bottom: 1px solid #eee;line-height: 120px;position: relative;margin: auto;
     color: rgb(119, 119, 119);color: #666;}
     .start h1 {font-size: 250%;line-height: 50px;}
