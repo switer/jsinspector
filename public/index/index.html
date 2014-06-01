@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
     <title>JS Web Inspector</title>
     <link rel="stylesheet" href="./pure-min.css">
+    <link rel="stylesheet" href="./font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="./index.css">
 </head>
 <body>
-    <div class="hero">JSInspector</div>
+    <div class="hero"><a href="http://github.com/switer/jsinspector" target="_blank">JSInspector</a></div>
     <div class="hero-desc">
         <p>Synchronize DOMContent and Actions from remote browser.</p>
         <p>You can use for remote demonstration or inspecting mobile web app.</p>
     </div>
     <div class="head">
         <h3>Inject the code to your website:</h3>
-        <a class="pure-button button-new" href="javascript:;" id="createButton">Create another</a>
+        <a class="pure-button button-new" href="javascript:;" id="createButton">
+            Switch
+            <i class="fa fa-random fa-1x"></i>
+        </a>
+
     </div>
     <div class="code">
         <code class="script" id="script"></code>
@@ -26,12 +31,13 @@
             Goto Inspector
         </a>
         <a class="pure-button button-secondary button-large" href="http://github.com/switer/jsinspector" target="_blank">
+            <i class="fa fa-github fa-lg"></i>
             View On Github
         </a>
     </p>
     <div class="footer">
         <div>JSInspector Project is under the <a href="http://opensource.org/licenses/MIT">MIT License</a></div>
-        <div>Copyright (c) 2014 <a href="http://github.com/switer">switer</a></div>
+        <div>Copyright (c) 2014 <a href="http://github.com/switer">switer</a> <i class="fa fa-github-alt"></i></div>
     </div>
     <script src="./index.js"></script>
     <div class="rainbow flb-box">
