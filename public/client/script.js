@@ -61,7 +61,13 @@
         styleSheets.forEach(function (item) {
             // think of those stylesheets without cssRules as CORS 
             if (!item.cssRules) {
-                getResource(item.href, function (styleText) {
+                $ajax({
+                    method: 'GET',
+                    url: '/src',
+                    data: {
+                        url: item.href
+                    }
+                }, function (styleText) {
                     var style = document.createElement('style'),
                         link = item.ownerNode;
 
@@ -73,6 +79,8 @@
                     if (count <= 0) {
                         callback && callback();
                     }
+                }, function (err) {
+                    // TODO
                 });
             } else {
                 count--;
@@ -93,7 +101,7 @@
             scripts = slice.call(doc.querySelectorAll('script')),
             styleSheets = slice.call(doc.querySelectorAll('link')),
             images = slice.call(doc.querySelectorAll('img')),
-            inputs = slice.call(doc.querySelectorAll('input'));
+            inputs = slice.call(doc.querySelectorAll('input,select,textarea'));
 
         scripts.forEach(function (item) {
             item.innerHTML = '';
@@ -128,27 +136,8 @@
 
     /* =================================================================== */
     /**
-     *  get resource content with url
+     *  use iframe for ajax CORS
      **/
-    function getResource (url, success, error) {
-        var id = requestId ++; 
-
-        iframe.contentWindow.postMessage({
-            id: id,
-            url: url,
-            static: true
-        }, '*');
-
-        /**
-         *  register postMessage callback
-         **/
-        requestHandlers[id] = {
-            success: function (data) {
-                success(data);
-            },
-            error: error
-        };
-    }
     function $ajax (options, success, error) {
         var id = requestId ++; 
         options.id = id;
@@ -356,9 +345,11 @@
 
                 dataPacketQueue.shift();
                 // aync for the performance
+
+                var timer = window.Worker ? 0 : 150; 
                 setTimeout( function() {
                     queueProcess();
-                }, 150);
+                }, timer);
                     
             }, function (err, xhr) {
 

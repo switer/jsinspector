@@ -32,66 +32,41 @@
         function type (obj) {
             return Object.prototype.toString.call(obj).match(/\[object (\w+)\]/)[1].toLowerCase();
         }
+        function xhrCopy (xhr) {
+            return {
+                    statusText: xhr.statusText, 
+                    status: xhr.status,
+                    response: xhr.response,
+                    responseText: xhr.responseText, 
+                    statusText: xhr.statusText
+                };
+        }
         if (notWorker) {
-            this.addEventListener('message', function (event) {
+            window.addEventListener('message', function (event) {
                 if (type(event.data) !== 'object') return;
 
                 var options = event.data;
-
-                if (options.static) {
-                    request({
-                        url: '/src',
-                        data: {
-                            url: encodeURIComponent(options.url)
-                        },
-                        success: function (data, xhr) {
-                            event.source.postMessage({
-                                id: options.id,
-                                data: data,
-                                xhr: {
-                                    statusText: xhr.statusText, 
-                                    status: xhr.status,
-                                    response: xhr.response,
-                                    responseText: xhr.responseText, 
-                                    statusText: xhr.statusText
-                                }
-                            }, '*');
-                        }
-                    });
-                } else {
-                    request({
-                        method: options.method,
-                        url: options.url,
-                        data: options.data,
-                        type: options.type,
-                        success: function (data, xhr) {
-                            event.source.postMessage({
-                                id: options.id,
-                                data: data,
-                                xhr: {
-                                    statusText: xhr.statusText, 
-                                    status: xhr.status,
-                                    response: xhr.response,
-                                    responseText: xhr.responseText, 
-                                    statusText: xhr.statusText
-                                }
-                            }, '*');
-                        },
-                        error: function (err, xhr) {
-                            event.source.postMessage({
-                                id: options.id,
-                                error: err || xhr.response,
-                                xhr: {
-                                    statusText: xhr.statusText, 
-                                    status: xhr.status,
-                                    response: xhr.response,
-                                    responseText: xhr.responseText, 
-                                    statusText: xhr.statusText
-                                }
-                            }, '*');
-                        }
-                    });                
-                }
+                request({
+                    method: options.method,
+                    url: options.url,
+                    data: options.data,
+                    type: options.type,
+                    success: function (data, xhr) {
+                        event.source.postMessage({
+                            id: options.id,
+                            data: data,
+                            xhr: xhrCopy(xhr)
+                        }, '*');
+                    },
+                    error: function (err, xhr) {
+                        event.source.postMessage({
+                            id: options.id,
+                            error: err || xhr.response,
+                            xhr: xhrCopy(xhr)
+                        }, '*');
+                    }
+                });
+                
             });
             
             /**
