@@ -274,7 +274,7 @@
                 }
                 // polling
                 dirtyChecking(hasDirtyCallback);
-            }, 300);
+            }, 500);
         }
         /**
          *  Generate delata data when has dirty data, else if return null
