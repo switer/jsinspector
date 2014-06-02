@@ -26,7 +26,7 @@
                         .replace(/</g, '&lt;')
                         .replace(/>/g, '&gt;')
                         .replace(/"/g, '&quot;')
-                        .replace(/\s+([a-zA-Z\-]+?)\=&quot;/g, ' <span class="attr"> $1</span>=&quot;')
+                        .replace(/\s+([a-zA-Z\-]+?)\=&quot;/g, ' <span class="attr"> $1</span><span class="equal">=</span>&quot;')
                         .replace(/=&quot;(.+?)&quot;/g, '=<span class="string">&quot;$1&quot;</span>')
                         .replace(/&lt;([a-zA-Z]+?)\s/g, '&lt;<span class="tagname">$1 </span>')
                         .replace(/\/([a-zA-Z]+?)&gt;/g, '<span class="tagclose">/</span><span class="tagname">$1</span>&gt;')

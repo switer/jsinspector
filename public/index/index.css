@@ -11,10 +11,15 @@ body {margin: 0;}
     .flb-p1 {-webkit-box-flex: 1; -ms-fex:1; box-flex:1; flex:1;}
 .ta-c {text-align: center;}
 .ta-l {text-align: left;}
+.link {color: #1f8dd6}
+.text-hl:hover {color: #333;}
 
-.hero {text-align: center;width: 700px;margin: auto;}
-    .hero-title {line-height: 200px;font-size: 500%;font-weight: 100;
+.hero {text-align: center;width: 800px;margin: auto;}
+    .hero-title {line-height: 200px;font-size: 500%;font-weight: 100;position: relative;
         font-family: cursive;color: #1f8dd6;text-decoration: none;display: inline-block;}
+        .hero-link { opacity: 0;position: absolute;top: 0px;right: -50px;font-size: 35px;color: #ddd;
+            -webkit-transition:opacity 0.5s ease;transition:opacity 0.5s ease;}
+        .hero-title:hover .hero-link {opacity: 1;}
     .hero-desc {text-align: center; color: #666;font-size: 120%;line-height: 30px;margin: 20px 0;}
         .hero-desc p {display: block;margin: auto;}
 
@@ -38,24 +43,27 @@ body {margin: 0;}
 /**
  *  Code styles
  **/
-code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #757575;
+code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #534C4C;
     padding: 10px 30px;border-left: 3px solid #1f8dd6;background: rgb(245, 251, 253);
     margin: auto;vertical-align: top;display: block;line-height: 40px;}
-    .tag {color: #EC008E;}
-    .string {color: #878D3B;}
+    .tag {color: #1f8dd6;}
+    .string {color: rgb(102, 102, 102);}
     .attr {color: rgb(255, 130, 47);}
-    .tagname {color: rgb(60, 86, 224);}
+    .tagname {color: rgb(102, 102, 102);}
     .tagclose {color: rgb(103, 246, 36);}
     .inspid {color: blue;}
+    .equal {color: #1f8dd6;}
 
 
 .docs {text-align: center;width: 700px;margin: auto;margin-bottom: 100px;}
     .start {border-bottom: 1px solid #eee;position: relative;margin: auto;
         color: rgb(119, 119, 119);color: #666;}
         .start-title {font-size: 250%;line-height: 80px;}
+        
+
         .start-subtitle {font-size: 110%;line-height: 40px;}
 .doc-title {font-size: 150%;line-height: 80px;text-align: left;color: #888;margin-top: 20px;}
-.doc-desc {line-height: 40px;text-align: left;color: rgb(119, 119, 119);margin-bottom: 10px;}
+.doc-desc {line-height: 40px;text-align: left;color: rgb(83, 74, 74)    ;margin-bottom: 10px;}
 .doc-hl {color: #1f8dd6;}
 
 .footer {text-align: center;background-color: #1f8dd6;color: white;line-height: 35px;padding-top: 50px;
