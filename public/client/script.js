@@ -274,7 +274,7 @@
                 }
                 // polling
                 dirtyChecking(hasDirtyCallback);
-            }, 500);
+            }, 300);
         }
         /**
          *  Generate delata data when has dirty data, else if return null
@@ -330,7 +330,7 @@
          **/
         function onDataPacketPush () {
             if (queueProcessing) {
-                // task queue manager is working now
+                // task queue manager is working now, lock
                 return;
             } else {
                 queueProcess();
@@ -355,7 +355,11 @@
                 retryTimes = 0;
 
                 dataPacketQueue.shift();
-                queueProcess();
+                // aync for the performance
+                setTimeout( function() {
+                    queueProcess();
+                }, 100);
+                    
             }, function (err, xhr) {
 
                 if (xhr.status == 400) { // session is out of date
