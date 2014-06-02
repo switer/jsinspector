@@ -358,7 +358,7 @@
                 // aync for the performance
                 setTimeout( function() {
                     queueProcess();
-                }, 100);
+                }, 150);
                     
             }, function (err, xhr) {
 
@@ -368,7 +368,9 @@
                     alert(err || 'network error!');
                 } else { // retry
                     retryTimes ++;
-                    queueProcess();
+                    setTimeout( function() {
+                        queueProcess();
+                    });
                 }
             });
         }
