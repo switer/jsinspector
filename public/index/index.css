@@ -61,7 +61,7 @@ code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #534C4
         .start-title {font-size: 250%;line-height: 80px;}
         
 
-        .start-subtitle {font-size: 110%;line-height: 40px;}
+        .start-subtitle {font-size: 110%;line-height: 40px; margin-bottom: 10px}
 .doc-title {font-size: 150%;line-height: 80px;text-align: left;color: #888;margin-top: 20px;}
 .doc-desc {line-height: 40px;text-align: left;color: rgb(83, 74, 74)    ;margin-bottom: 10px;}
 .doc-hl {color: #1f8dd6;}
