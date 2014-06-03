@@ -34,6 +34,12 @@
             // update some metas only
             window.scrollTo(0, data.meta.scrollTop);
         }
+        if (data.meta.consoles) {
+            var consoles = data.meta.consoles;
+            consoles.forEach(function (item) {
+                console[item.type].apply(console, item.args);
+            });
+        }
     }
     /**
      *  Write iframe document

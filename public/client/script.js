@@ -1,5 +1,7 @@
 ;(function () {
+
     var slice = Array.prototype.slice,
+        toString = Object.prototype.toString,
         iframe = document.createElement('iframe'),
         script = document.createElement('script'),
         inspectorId = '<%= inspectorId %>',
@@ -8,6 +10,32 @@
         baseDocumentData,
         dataPacketQueue = [],
         differ;
+
+
+    /**
+     *  Console.log overide
+     **/
+    var _log = console.log,
+        consoles = [];
+
+    console.log = function () {
+        var args = slice.call(arguments);
+        args.forEach(function (item, index) {
+            try {
+                JSON.stringify(item);    
+                args[index] = item;
+            } catch (e) {
+                args[index] = toString.call(item);
+            }
+        });
+
+        consoles.push({
+            type: 'log',
+            args: args
+        });
+
+        _log.apply(console, arguments);
+    }
 
     /**
      *  load jsondiffpatch module
@@ -101,7 +129,8 @@
             scripts = slice.call(doc.querySelectorAll('script')),
             styleSheets = slice.call(doc.querySelectorAll('link')),
             images = slice.call(doc.querySelectorAll('img')),
-            inputs = slice.call(doc.querySelectorAll('input,select,textarea'));
+            inputs = slice.call(doc.querySelectorAll('input,textarea'));
+            selects = slice.call(doc.querySelectorAll('select'));
 
         scripts.forEach(function (item) {
             item.innerHTML = '';
@@ -121,6 +150,15 @@
             if (item.getAttribute('value') !== item.value) {
                 item.setAttribute('value', item.value);
             }
+        });
+        selects.forEach(function (item) {
+            var options = slice.call(item.querySelectorAll('option'));
+            options.forEach(function (option) {
+                if (item.value == option.value) {
+                    option.setAttribute('selected', 'true');
+                    return true;
+                }
+            });
         });
         // get document doctype
         var node = document.doctype,
@@ -226,6 +264,11 @@
                 // call when check for the delta change
                 sendToQueue(dataPacket);
             });
+
+            consoleChecking(function (dataPacket) {
+                sendToQueue(dataPacket);
+            });
+
             window.addEventListener('hashchange', function () {
                 var dataPacket = genDetalData();
                 if (dataPacket) {
@@ -264,6 +307,23 @@
                 // polling
                 dirtyChecking(hasDirtyCallback);
             }, 300);
+        }
+
+        function consoleChecking (hasConsoleCallback) {
+            setTimeout(function() {
+                var dataPacket;
+                if (consoles.length > 0) {
+                    dataPacket = {
+                        meta: {
+                            consoles: consoles,
+                        },
+                        inspectorId: inspectorId
+                    }
+                    consoles = [];
+                    hasConsoleCallback(dataPacket);
+                }
+                consoleChecking(hasConsoleCallback);
+            }, 100);
         }
         /**
          *  Generate delata data when has dirty data, else if return null
@@ -346,7 +406,7 @@
                 dataPacketQueue.shift();
                 // aync for the performance
 
-                var timer = window.Worker ? 0 : 150; 
+                var timer = window.Worker ? 0 : 100; 
                 setTimeout( function() {
                     queueProcess();
                 }, timer);
@@ -396,7 +456,6 @@
                         rules: matchesRules
                     }
                 }, function () {
-                    // console.log('success');
                 });
             });*/
         });
