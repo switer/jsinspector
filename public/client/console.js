@@ -5,7 +5,7 @@
     'use strict;'
 
     if (!window.insp_consoles) {
-        var native_log = console.log;
+        exports.native_log = console.log;
 
         exports.insp_consoles = exports.insp_consoles || [];
         exports.insp_times = exports.insp_times || {};
