@@ -5,6 +5,8 @@
     'use strict;'
 
     if (!exports.insp_console_inited) {
+        var slice = Array.prototype.slice;
+
         // mark as inited
         exports.insp_console_inited = true;
 
