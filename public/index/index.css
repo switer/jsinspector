@@ -13,6 +13,8 @@ body {margin: 0;}
 .ta-l {text-align: left;}
 .link {color: #1f8dd6}
 .text-hl:hover {color: #333;}
+.f-sm {color: #333;font-size: 60%;}
+.lh-sm {line-height: 25px;}
 
 .hero {text-align: center;width: 800px;margin: auto;}
     .hero-title {line-height: 200px;font-size: 500%;font-weight: 100;position: relative;
@@ -53,9 +55,10 @@ code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #534C4
     .tagclose {color: rgb(103, 246, 36);}
     .inspid {color: blue;}
     .equal {color: #1f8dd6;}
+    .comment {color: #ccc;}
 
 
-.docs {text-align: center;width: 700px;margin: auto;margin-bottom: 100px;}
+.docs {text-align: center;width: 750px;margin: auto;margin-bottom: 100px;}
     .start {border-bottom: 1px solid #eee;position: relative;margin: auto;
         color: rgb(119, 119, 119);color: #666;}
         .start-title {font-size: 250%;line-height: 80px;}

@@ -76,11 +76,57 @@
             (your can get then link on your server <strong>home page</strong>).
         </div>
         <code class="ta-l">
-            <div>## home page</div>
+            <div class="comment">## home page</div>
             <div>https://yourhost:port/</div>
-            <div>## inspector page</div>
+            <div class="comment">## inspector page</div>
             <div>https://yourhost:port/devtools?xxx-xxx</div>
         </code>
+        <div class="doc-title text-hl">Usage</div>
+        <div class="doc-desc">
+            <h4>HTML sync</h4>
+            <div>is the primary feature, all the html of client will be synchroized to remote server and can be view on 
+            <strong>inspector</strong> window (eg. http://yourhost/devtools?xxxx-xxxxx).</div>
+            <h4>Console sync</h4>
+            <div>
+                support console: `log`, `clear`, `error`, `info`, `warn`, `time` and `timeEnd`, these console api will be synchroized and show in inspector's `devtool-console panel`.
+                <p>It support every object to console.log, such as:</p>
+                <code class="ta-l f-sm lh-sm">
+                    <div class="comment">// global object</div>
+                    <div>
+                        console.log(window); 
+                        <span class="comment">// -> {xxx: 'String', xxx2: 'Function', ..., window: 'Global'} </span>
+                    </div>
+                    <div class="comment">// document object</div>
+                    <div>
+                        console.log(document); 
+                        <span class="comment">// -> {xxx: 'String', xxx2: 'Function', ..., body: 'HTMLBodyElement'}</span>
+                    </div>
+                    <div class="comment">// null</div>
+                    <div>console.log(null); <span class="comment">// -> null</span></div>
+                    <div class="comment">// undefined will be a undefined string</div>
+                    <div>console.log(undefined);<span class="comment"> // -> 'undefined'</span></div>
+                    <div class="comment">// NaN will be a NaN string</div>
+                    <div>console.log(NaN); <span class="comment">// -> 'NaN'</span></div>
+                    <div class="comment">// No-JSON object : function will be function code string</div>
+                    <div>
+                        console.log({name: function () {console.log('xxxx');}}); 
+                        <span class="comment">// -> { name: "function () {console.log('xxxx');}" }</span>
+                    </div>
+                    <div class="comment">// No-JSON object : Element Node will be tagHTML(outerHTML.replace(innerHTML, ''))</div>
+                    <div>
+                        console.log([1, 2, document.body]); 
+                        <span class="comment">// -> [1, 2, "&lt;body&gt;&lt;/body&gt;"]</span>
+                    </div>
+                    <div class="comment">// No-JSON object : Text Node will be textContent</div>
+                    <div>
+                        console.log(document.body.childNodes[0]); 
+                        <span class="comment">// -> "\r\nxxxx"</span>
+                    </div>
+                </code>
+            </div>
+            <h4>Exceptions sync</h4>
+            <div>use `window.onerror`(window.addEventListener('error')) to catch global exceptions. Those error will be synchroized in inspector's `devtool-console panel`. use output format: `console.error(error, src + lineNumber)`</div>
+        </div>
     </div>
 
 
