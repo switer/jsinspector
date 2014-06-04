@@ -3,14 +3,15 @@
  **/
 !function (exports) {
     'use strict;'
-    
+
     if (!window.insp_consoles) {
         var native_log = console.log;
 
-        exports.insp_log = function() {
+        exports.insp_consoles = exports.insp_consoles || [];
+        exports.insp_times = exports.insp_times || {};
+        exports.insp_log = exports.insp_log || function() {
             native_log.apply(console, arguments);
         }
-        exports.insp_consoles = exports.insp_consoles || [];
 
         function logHandler (type, args) {
             insp_log.apply(this, args);
@@ -35,6 +36,23 @@
         }
         console.clear = function () {
             logHandler('clear', arguments);
+        }
+        console.error = function () {
+            logHandler('error', arguments);
+        }
+        console.info = function () {
+            logHandler('info', arguments);
+        }
+        console.warn = function () {
+            logHandler('warn', arguments);
+        }
+        console.time = function (name) {
+            insp_times[name] = Date.now();
+        }
+        console.timeEnd = function (name) {
+            if (insp_times[name] == undefined) return;
+            var end = Date.now() - insp_times[name];
+            logHandler('log', ['%c' + name + ': ' + end + 'ms', 'color: blue'])
         }
         console.clear();
     }
