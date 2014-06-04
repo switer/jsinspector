@@ -34,6 +34,39 @@ https://yourhost:port/
 https://yourhost:port/devtools?xxx-xxx
 ```
 
+## Usage
+#### HTML sync
+is the primary feature, all the html of client will be synchroized to remote server and can be view on
+__inspector__ window(eg. http://yourhost/devtools?xxxx-xxxxx).
+
+#### Console sync
+support console: `log`, `clear`, `error`, `info`, `warn`, `time` and `timeEnd`, these console api will be synchroized and show in inspector's `devtool-console panel`.
+It support every object to console.log, such as:
+```javascript
+// global object
+console.log(window); // -> {xxx: 'String', xxx2: 'Function', ..., window: 'Global'} 
+// document object
+console.log(document); // -> {xxx: 'String', xxx2: 'Function', ..., body: 'HTMLBodyElement'}
+// null
+console.log(null); // -> null
+// undefined will be a undefined string
+console.log(undefined); // -> 'undefined'
+// NaN will be a NaN string
+console.log(NaN); // -> 'NaN'
+// No-JSON object : function will be function code string
+console.log({name: function () {console.log('xxxx');}}); // -> { name: "function () {console.log('xxxx');}" }
+// No-JSON object : Element Node will be tagHTML(outerHTML.replace(innerHTML, ''))
+console.log([1, 2, document.body]); // -> [1, 2, "<body></body>"]
+// No-JSON object : Text Node will be textContent
+console.log(document.body.childNodes[0]); // -> "\r\nxxxx"
+```
+
+#### Exceptions sync
+use `window.onerror`(window.addEventListener('error')) to catch global exceptions. Those error will be synchroized in 
+inspector's `devtool-console panel`. use output format: `console.error(error, src + lineNumber)`
+
+
+
 ## License
 
 The MIT License (MIT)
