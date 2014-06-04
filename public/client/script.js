@@ -1,9 +1,5 @@
 <%- jsonify %>
 <%- console %>
-/*global error handle*/
-window.addEventListener('error', function(error) {
-    console.log('%c' + error.message + '    %c' + error.filename + ':' + error.lineno, 'color:red', 'color:gray;');
-});
 ;(function () {
 
     var slice = Array.prototype.slice,
