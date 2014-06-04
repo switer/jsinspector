@@ -1,3 +1,5 @@
+<%- jsonify %>
+<%- console %>
 ;(function () {
 
     var slice = Array.prototype.slice,
@@ -10,32 +12,6 @@
         baseDocumentData,
         dataPacketQueue = [],
         differ;
-
-
-    /**
-     *  Console.log overide
-     **/
-    var _log = console.log,
-        consoles = [];
-
-    console.log = function () {
-        var args = slice.call(arguments);
-        args.forEach(function (item, index) {
-            try {
-                JSON.stringify(item);    
-                args[index] = item;
-            } catch (e) {
-                args[index] = toString.call(item);
-            }
-        });
-
-        consoles.push({
-            type: 'log',
-            args: args
-        });
-
-        _log.apply(console, arguments);
-    }
 
     /**
      *  load jsondiffpatch module
@@ -312,14 +288,14 @@
         function consoleChecking (hasConsoleCallback) {
             setTimeout(function() {
                 var dataPacket;
-                if (consoles.length > 0) {
+                if (insp_consoles.length > 0) {
                     dataPacket = {
                         meta: {
-                            consoles: consoles,
+                            consoles: insp_consoles,
                         },
                         inspectorId: inspectorId
                     }
-                    consoles = [];
+                    insp_consoles = [];
                     hasConsoleCallback(dataPacket);
                 }
                 consoleChecking(hasConsoleCallback);

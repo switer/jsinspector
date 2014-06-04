@@ -37,7 +37,7 @@
         if (data.meta.consoles) {
             var consoles = data.meta.consoles;
             consoles.forEach(function (item) {
-                console[item.type].apply(console, item.args);
+                console[item.type].apply(console, eval('(' + item.args + ')'));
             });
         }
     }

@@ -76,11 +76,15 @@ function rawBody(req, res, next) {
  *  Client routes
  **/
 app.get('/inspector', inspectorIdParse, function (req, res) {
-    var script = readFile('./public/client/script.js', 'utf-8');
+    var script = readFile('./public/client/script.js', 'utf-8'),
+        jsonify = readFile('./public/client/jsonify.js', 'utf-8');
+        consoleJS = readFile('./public/client/console.js', 'utf-8');
     res.setHeader('Content-type', 'application/javascript');
     res.send(ejs.render(script, {
         host: 'http://' + req.headers.host,
-        inspectorId: req.inspectorId
+        inspectorId: req.inspectorId,
+        jsonify: jsonify,
+        console: consoleJS
     }));
 });
 /**
