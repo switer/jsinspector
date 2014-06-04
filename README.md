@@ -3,12 +3,12 @@
 Synchronize DOMContent, Console(logs) and Errors from remote browser.
 It makes a web projection. You can use for remote demonstration or debugging mobile web app.
 
-## Usage
+## Quickly Started
 
 * Visit __jsinspector__ [home page](http://jsinspector.com/)
-* InJector the __script__ which form home page to your app's html
+* Inject the __script__ which from home page to your webapp's html
 * After running your website that has injected the jsinspector script, 
-  open __inspector__ (which has a button-link on home page), your can see the inspected page on __inspector page__
+  open __inspector window__ (which has a button-link on home page), your can see the inspected page on __inspector window__
 
 ## Running JSInspector Server
 
@@ -34,7 +34,7 @@ https://yourhost:port/
 https://yourhost:port/devtools?xxx-xxx
 ```
 
-## Usage
+## Features
 #### HTML sync
 is the primary feature, all the html of client will be synchroized to remote server and can be view on
 __inspector__ window(eg. http://yourhost/devtools?xxxx-xxxxx).
