@@ -1,7 +1,7 @@
 ![jsinspector](http://switer.github.io/live/images/jsinspector.png)
 ===================================================================
 Synchronize DOMContent, Console(logs) and Errors from remote browser.
-It likes a simple web projection. You can use for remote demonstration or debugging mobile web app.
+It makes a web projection. You can use for remote demonstration or debugging mobile web app.
 
 ## Usage
 
@@ -10,14 +10,14 @@ It likes a simple web projection. You can use for remote demonstration or debugg
 * After running your website that has injected the jsinspector script, 
   open __inspector__ (which has a button-link on home page), your can see the inspected page on __inspector page__
 
-## running Jsinspector Server Yourself
+## Running JSInspector Server
 
 #### Installing
 ```bash
 git clone https://github.com/switer/jsinspector.git jsinspector
 ```
 
-#### Starting server
+#### Starting Server
 JSInspector server require [node.js](http://nodejs.org). After install node , running server with [npm](http://npmjs.org) (node.js package manager).
 ```bash
 cd ./jsinspector
@@ -25,7 +25,7 @@ npm i
 npm start
 ```
 
-### Visit Home Page and Inject the script
+### Visit Home Page And Inject The Script
 Inject the __script__ (which has an inspector id) from __home page__ to remote website, then visit __inspector__ (your can get then link on home page):
 ```bash
 ## home page
