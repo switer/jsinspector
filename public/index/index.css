@@ -1,5 +1,5 @@
 /*#1f8dd6*/
-html {font-family: proxima-nova, Consolas, 'Liberation Mono', Courier, monospace;}
+html {font-family: 'proxima-nova', Consolas, sans-serif;;}
 body {margin: 0;}
 
  @font-face {
@@ -16,7 +16,7 @@ body {margin: 0;}
 
 .hero {text-align: center;width: 800px;margin: auto;}
     .hero-title {line-height: 200px;font-size: 500%;font-weight: 100;position: relative;
-        font-family: cursive;color: #1f8dd6;text-decoration: none;display: inline-block;}
+        font-family: 'Cabin Sketch', cursive;color: #1f8dd6;text-decoration: none;display: inline-block;}
         .hero-link { opacity: 0;position: absolute;top: 0px;right: -50px;font-size: 35px;color: #ddd;
             -webkit-transition:opacity 0.5s ease;transition:opacity 0.5s ease;}
         .hero-title:hover .hero-link {opacity: 1;}
@@ -29,7 +29,7 @@ body {margin: 0;}
     .button-new {background: #fff;color: #1f8dd6;}
 
 .head {text-align: left;}
-.head h3 {margin: 20px auto;margin-top: 30px;display: inline-block;font-family: Monaco,'Courier New', monospace, proxima-nova;}
+.head h4 {margin: 20px auto;margin-top: 30px;display: inline-block; font-family: 'Courier New', proxima-nova; }
 
 .rainbow .item {border-top:50px solid;}
     .rainbow .item:nth-child(1){border-color: #51DD4C;}
@@ -75,8 +75,10 @@ code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #534C4
         .hero-title {font-size: 300%;line-height: 130px;}
         .hero-desc {line-height: 20px;font-size: 0px;text-align: left;padding: 0 10px;}
             .hero-desc p {display: inline-block;width: 50%;font-size: 14px;display: inline;}
-    .head h3 {font-size: 100%;margin-top: 0px;}
+    .head {text-align: center;}
+    .head h4 {font-size: 100%;margin-top: 0px;}
     code {text-align: left;font-size: 90%;}
     .button-large {font-size: 100%;}
+    .docs {width: auto;padding: 0 15px;}
     .footer {font-size: 90%;padding-top: 50px;padding-bottom: 30px;}
 }
