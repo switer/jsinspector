@@ -1,16 +1,16 @@
 ![jsinspector](http://switer.github.io/live/images/jsinspector.png)
 ===================================================================
-Synchronize DOMContent and Actions from remote browser.
-You can use for remote demonstration or inspecting mobile web app.
+Synchronize DOMContent, Console(logs) and Errors from remote browser.
+It likes a simple web projection. You can use for remote demonstration or debugging mobile web app.
 
 ## Usage
 
 * Visit __jsinspector__ [home page](http://jsinspector.com/)
 * InJector the __script__ which form home page to your app's html
-* After runing your website that has injected the jsinspector script, 
+* After running your website that has injected the jsinspector script, 
   open __inspector__ (which has a button-link on home page), your can see the inspected page on __inspector page__
 
-## Runing Jsinspector Server Yourself
+## running Jsinspector Server Yourself
 
 #### Installing
 ```bash
@@ -18,7 +18,7 @@ git clone https://github.com/switer/jsinspector.git jsinspector
 ```
 
 #### Starting server
-JSInspector server require [node.js](http://nodejs.org). After install node , runing server with [npm](http://npmjs.org) (node.js package manager).
+JSInspector server require [node.js](http://nodejs.org). After install node , running server with [npm](http://npmjs.org) (node.js package manager).
 ```bash
 cd ./jsinspector
 npm i
