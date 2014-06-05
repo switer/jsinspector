@@ -40,13 +40,15 @@
 
     createScript();
     
-
     var $devtoolsButton = document.querySelector('#devtoolsButton');
-    $devtoolsButton.href = window.location.origin + '/devtools?' + UUID();
+    function updateDevtoolsLink () {
+        $devtoolsButton.href = window.location.origin + '/devtools?' + UUID();
+    }
 
     document.querySelector('#createButton').onclick = function () {
         localStorage.removeItem('__jsinspector_uuid__')
         createScript();
+        updateDevtoolsLink();
     }
 
 })();
