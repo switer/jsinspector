@@ -40,8 +40,8 @@
 
     createScript();
     
-    var $devtoolsButton = document.querySelector('#devtoolsButton');
     function updateDevtoolsLink () {
+        var $devtoolsButton = document.querySelector('#devtoolsButton');
         $devtoolsButton.href = window.location.origin + '/devtools?' + UUID();
     }
 
@@ -50,5 +50,7 @@
         createScript();
         updateDevtoolsLink();
     }
+    // initialize update
+    updateDevtoolsLink();
 
 })();
