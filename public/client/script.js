@@ -193,7 +193,7 @@
                 onloadend();
             }
             script.onload = function () {
-                iframeLoaded = true;
+                scriptLoaded = true;
                 onloadend();
             }
     });
@@ -231,21 +231,6 @@
 
             documentUpload(uploadData, done);
         }
-
-        function SSID () {
-            var ssid = sessionStorage.getItem('__js_inspector_ssid__');
-            if (ssid) {
-                return ssid;
-            } else {
-                ssid = UUID.generate();
-                sessionStorage.setItem('__js_inspector_ssid__', ssid);
-                return ssid;
-            }
-        }
-        SSID.get = function () {
-            return sessionStorage.getItem('__js_inspector_ssid__');
-        }
-
         function documentUpload (data, callback) {
             initPost(data, function () {
                 baseDocumentData = data;
@@ -452,6 +437,7 @@
         });*/
     }
 
+
     /* =================================================================== */
     /**
      *  @https://github.com/LiosK/UUID.js/blob/master/src/uuid.core.js
@@ -508,4 +494,23 @@
       for (; i > 0; i >>>= 1, z += z) { if (i & 1) { str = z + str; } }
       return str;
     };
+
+    /* =================================================================== */
+    /**
+     *  session id generator
+     **/
+    function SSID () {
+        var ssid = sessionStorage.getItem('__js_inspector_ssid__');
+        if (ssid) {
+            return ssid;
+        } else {
+            ssid = UUID.generate();
+            sessionStorage.setItem('__js_inspector_ssid__', ssid);
+            return ssid;
+        }
+    }
+    SSID.get = function () {
+        return sessionStorage.getItem('__js_inspector_ssid__');
+    };
+    
 })();
