@@ -17,15 +17,12 @@
      *  load jsondiffpatch module
      **/
     script.src="<%= host %>/jsondiffpatch.js";
-    document.body.appendChild(script);
-
     /**
      *  create iframe for CORS
      **/
     iframe.style.display = 'none';
     iframe.src = '<%= host %>/client/frame.html';
     iframe.id = '__jsinspector_cors_iframe';
-    document.body.appendChild(iframe);
 
     /* =================================================================== */
     /**
@@ -110,7 +107,8 @@
 
         scripts.forEach(function (item) {
             item.innerHTML = '';
-            item.src = "";
+            item.setAttribute('_src', item.src);
+            item.src = '';
         });
         styleSheets.forEach(function (item) {
             if (item.getAttribute('href') !== item.href) {
@@ -165,7 +163,41 @@
             error: error
         };
     }
-    iframe.onload = function () {
+
+    /* =================================================================== */
+    /**
+     *  replace cross-domain's stylesheets
+     **/
+    window.addEventListener('load', function () {
+
+            var scriptLoaded = true,
+                iframeLoaded = false;
+
+            document.body.appendChild(script);
+            document.body.appendChild(iframe);
+
+            function onloadend () {
+                if (iframeLoaded && scriptLoaded) {
+                    differ = jsondiffpatch.create({
+                        textDiff: {
+                            // default 60, minimum string length (left and right sides) 
+                            // to use text diff algorythm: google-diff-match-patch
+                            minLength: 60
+                        }
+                    });
+                    iframeLoadEndHandler();
+                }
+            }
+            iframe.onload = function () {
+                iframeLoaded = true;
+                onloadend();
+            }
+            script.onload = function () {
+                iframeLoaded = true;
+                onloadend();
+            }
+    });
+    function iframeLoadEndHandler () {
         /**
          *  receive postMessage response 
          **/
@@ -401,40 +433,23 @@
                 }
             });
         }
-
-
-        /* =================================================================== */
-        /**
-         *  replace cross-domain's stylesheets
-         **/
-        window.addEventListener('load', function () {
-            differ = jsondiffpatch.create({
-                textDiff: {
-                    // default 60, minimum string length (left and right sides) 
-                    // to use text diff algorythm: google-diff-match-patch
-                    minLength: 60
-                }
-            });
-            // document base content initial upload
-            documentInitalize(function () {
-                // delta upload after base document upload done
-                deltaCheckingStart();
-            });
-            // sync the data such as "scrollTop", unless document content
-
-            /*replaceCORSStyleSheet(function () {
-                var matchesRules = getMatchesRules(document.body);
-
-                $ajax({
-                    method: 'POST',
-                    url: '/stylesheets',
-                    data: {
-                        rules: matchesRules
-                    }
-                }, function () {
-                });
-            });*/
+        // document base content initial upload
+        documentInitalize(function () {
+            // delta upload after base document upload done
+            deltaCheckingStart();
         });
+        /*replaceCORSStyleSheet(function () {
+            var matchesRules = getMatchesRules(document.body);
+
+            $ajax({
+                method: 'POST',
+                url: '/stylesheets',
+                data: {
+                    rules: matchesRules
+                }
+            }, function () {
+            });
+        });*/
     }
 
     /* =================================================================== */
