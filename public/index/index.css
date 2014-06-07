@@ -33,7 +33,7 @@ body {margin: 0;}
 .head {text-align: left;}
 .head h4 {margin: 20px auto;margin-top: 30px;display: inline-block; font-family: 'Courier New', proxima-nova; }
 
-.rainbow .item {border-top:50px solid;}
+.rainbow .item {border-top:10px solid;}
     .rainbow .item:nth-child(1){border-color: #51DD4C;}
     .rainbow .item:nth-child(2){border-color: rgb(80, 28, 192);}
     .rainbow .item:nth-child(3){border-color: white;}

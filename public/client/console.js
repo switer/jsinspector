@@ -10,14 +10,22 @@
         // mark as inited
         exports.insp_console_inited = true;
 
-        exports.native_log = exports.native_log || console.log;
+        exports.native_console = {
+            log: console.log,
+            clear: console.log,
+            error: console.error,
+            info: console.info,
+            warn: console.warn,
+            time: console.time,
+            timeEnd: console.timeEnd,
+        }
         exports.insp_consoles = [];
         exports.insp_times = {};
-        exports.insp_log = function() {
-            native_log.apply(console, arguments);
+        exports.insp_log = function(type, args) {
+            native_console[type].apply(console, args);
         }
         exports.insp_logHandler = function (type, args, noLocal) {
-            !noLocal && insp_log.apply(this, args);
+            !noLocal && insp_log(type, args);
 
             args = slice.call(args);
             args.forEach(function (item, index) {
