@@ -8,10 +8,11 @@
     <!-- <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'> -->
     <!-- <link href='http://fonts.googleapis.com/css?family=Josefin+Slab' rel='stylesheet' type='text/css'> -->
     <!-- <link href='http://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'> -->
-    <link href='http://fonts.googleapis.com/css?family=Cabin+Sketch' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="./index/pure-min.css">
     <link rel="stylesheet" href="./index/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="./index/index.css">
+    <link rel="stylesheet" href="./index/index.css">
+    <link rel="stylesheet" href="./index/colocodo.css">
 </head>
 <body>
     <div class="hero">
@@ -50,7 +51,9 @@
 
 
         <div class="doc-title text-hl">Installing</div>
-        <code class="ta-l">git clone https://github.com/switer/jsinspector.git jsinspector</code>
+        <script class="ta-l" type="text/colo-command">
+            git clone https://github.com/switer/jsinspector.git jsinspector
+        </script>
 
 
         <div class="doc-title text-hl">Starting server</div>
@@ -59,11 +62,11 @@
             After install node , running server with <a class="link" target="_blank" href="https://www.npmjs.org", >npm</a>
             (node.js package manager).
         </div>
-        <code class="ta-l">
-            <div>cd ./jsinspector</div>
-            <div>npm i</div>
-            <div>npm start</div>
-        </code>
+        <script type="text/colo-command" class="ta-l">
+            cd ./jsinspector
+            npm i
+            npm start
+        </script>
 
 
         <div class="doc-title text-hl">Visit Home Page And Inject The Script</div>
@@ -75,12 +78,12 @@
             to remote website, then visit <strong>inspector</strong>
             (your can get then link on your server <strong>home page</strong>).
         </div>
-        <code class="ta-l">
-            <div class="comment">## home page</div>
-            <div>https://yourhost:port/</div>
-            <div class="comment">## inspector page</div>
-            <div>https://yourhost:port/devtools?xxx-xxx</div>
-        </code>
+        <script class="ta-l" type="text/colo-command">
+            ## home page
+            https://yourhost:port/
+            ## inspector page
+            https://yourhost:port/devtools?xxx-xxx
+        </script>
         <div class="doc-title text-hl">Features</div>
         <div class="doc-desc">
             <h4>HTML sync</h4>
@@ -90,39 +93,24 @@
             <div>
                 support console: `log`, `clear`, `error`, `info`, `warn`, `time` and `timeEnd`, these console api will be synchroized and show in inspector's `devtool-console panel`.
                 <p>It support every object to console.log, such as:</p>
-                <code class="ta-l f-sm lh-sm">
-                    <div class="comment">// global object</div>
-                    <div>
-                        console.log(window); 
-                        <span class="comment">// -> {xxx: 'String', xxx2: 'Function', ..., window: 'Global'} </span>
-                    </div>
-                    <div class="comment">// document object</div>
-                    <div>
-                        console.log(document); 
-                        <span class="comment">// -> {xxx: 'String', xxx2: 'Function', ..., body: 'HTMLBodyElement'}</span>
-                    </div>
-                    <div class="comment">// null</div>
-                    <div>console.log(null); <span class="comment">// -> null</span></div>
-                    <div class="comment">// undefined will be a undefined string</div>
-                    <div>console.log(undefined);<span class="comment"> // -> 'undefined'</span></div>
-                    <div class="comment">// NaN will be a NaN string</div>
-                    <div>console.log(NaN); <span class="comment">// -> 'NaN'</span></div>
-                    <div class="comment">// No-JSON object : function will be function code string</div>
-                    <div>
-                        console.log({name: function () {console.log('xxxx');}}); 
-                        <span class="comment">// -> { name: "function () {console.log('xxxx');}" }</span>
-                    </div>
-                    <div class="comment">// No-JSON object : Element Node will be tagHTML(outerHTML.replace(innerHTML, ''))</div>
-                    <div>
-                        console.log([1, 2, document.body]); 
-                        <span class="comment">// -> [1, 2, "&lt;body&gt;&lt;/body&gt;"]</span>
-                    </div>
-                    <div class="comment">// No-JSON object : Text Node will be textContent</div>
-                    <div>
-                        console.log(document.body.childNodes[0]); 
-                        <span class="comment">// -> "\r\nxxxx"</span>
-                    </div>
-                </code>
+                <script class="ta-l f-sm lh-sm" type="text/colo-js">
+                    // global object
+                    console.log(window); // -> {xxx: 'String', ..., window: 'Global'}
+                    // document object 
+                    console.log(document); // -> {xxx: 'String', ..., body: 'HTMLBodyElement'}
+                    // null
+                    console.log(null); // -> null
+                    // undefined will be a undefined string
+                    console.log(undefined); // -> 'undefined'
+                    // NaN will be a NaN string
+                    console.log(NaN);// -> 'NaN'
+                    // No-JSON object : function will be function code string
+                    console.log({name: function () {console.log('xxxx');}}); // -> { name: "function () {console.log('xxxx');}" 
+                    // No-JSON object : Element Node will be tagHTML(outerHTML.replace(innerHTML, ''))
+                    console.log([1, 2, document.body]); // -> [1, 2, "<body></body>"]
+                    // No-JSON object : Text Node will be textContent
+                    console.log(document.body.childNodes[0]); // -> "\r\nxxxx"
+                </script>
             </div>
             <h4>Exceptions sync</h4>
             <div>use `window.onerror`(window.addEventListener('error')) to catch global exceptions. Those error will be synchroized in inspector's `devtool-console panel`. use output format: `console.error(error, src + lineNumber)`</div>
@@ -134,7 +122,6 @@
         <div>JSInspector Project is under the <a href="http://opensource.org/licenses/MIT">MIT License</a></div>
         <div>Copyright (c) 2014 <a href="http://github.com/switer">switer</a> <i class="fa fa-github-alt"></i></div>
     </div>
-    <script src="./index/index.js"></script>
     <div class="rainbow flb-box">
         <div class="item flb-p1"></div>
         <div class="item flb-p1"></div>
@@ -143,6 +130,9 @@
         <div class="item flb-p1"></div>
         <div class="item flb-p1"></div>
     </div>
+    <script src="./index/index.js"></script>
+    <script src="./index/colocodo.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Cabin+Sketch' rel='stylesheet' type='text/css'>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
