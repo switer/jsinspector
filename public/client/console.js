@@ -73,7 +73,14 @@
         /* =================================================================== */
         /*global error handle*/
         exports.insp_errorHandler = function (error) {
-            insp_logHandler('error', [error.message + '    %c' + error.filename + ':' + error.lineno, 'color:gray;'], true);
+            var args = [
+                error.message + '    %c' + error.filename + ':' + error.lineno, 
+                'color:gray;'
+            ];
+            if (error.stack) {
+                args.push(error.stack);
+            }
+            insp_logHandler('error', args, true);
         };
         window.addEventListener('error', insp_errorHandler);
     }

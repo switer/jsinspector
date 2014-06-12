@@ -5,7 +5,7 @@
     var slice = Array.prototype.slice,
         toString = Object.prototype.toString,
         iframe = document.createElement('iframe'),
-        script = document.createElement('script'),
+        jdpScript = document.createElement('script'),
         inspectorId = '<%= inspectorId %>',
         requestHandlers = {},
         requestId = 0,
@@ -16,7 +16,7 @@
     /**
      *  load jsondiffpatch module
      **/
-    script.src="<%= host %>/jsondiffpatch.js";
+    jdpScript.src="<%= host %>/jsondiffpatch.js";
     /**
      *  create iframe for CORS
      **/
@@ -170,10 +170,10 @@
      **/
     window.addEventListener('load', function () {
 
-            var scriptLoaded = true,
+            var scriptLoaded = false,
                 iframeLoaded = false;
 
-            document.body.appendChild(script);
+            document.body.appendChild(jdpScript);
             document.body.appendChild(iframe);
 
             function onloadend () {
@@ -191,8 +191,9 @@
             iframe.onload = function () {
                 iframeLoaded = true;
                 onloadend();
+                    
             }
-            script.onload = function () {
+            jdpScript.onload = function () {
                 scriptLoaded = true;
                 onloadend();
             }
