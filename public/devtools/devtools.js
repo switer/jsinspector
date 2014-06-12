@@ -1,4 +1,22 @@
 !(function () {
+    function detectmob() {
+        if ( navigator.userAgent.match(/Android/i)
+            || navigator.userAgent.match(/webOS/i)
+            || navigator.userAgent.match(/iPhone/i)
+            || navigator.userAgent.match(/iPad/i)
+            || navigator.userAgent.match(/iPod/i)
+            || navigator.userAgent.match(/BlackBerry/i)
+            || navigator.userAgent.match(/Windows Phone/i)
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    var isMobile = detectmob();
+
+
     var slice = Array.prototype.slice,
         socket = io.connect('<%= host %>'),
         inspectorId = '<%= inspectorId %>',
@@ -12,7 +30,14 @@
         });
 
     function updateFrameHeight () {
-        inspectedWindow.style.height = inspectedWindow.contentDocument.body.scrollHeight + 'px';
+        if (isMobile) {
+            inspectedWindow.scrolling = 'no';
+            inspectedWindow.style.height = inspectedWindow.contentDocument.body.scrollHeight + 'px';
+        } else {
+            inspectedWindow.scrolling = 'yes';
+            inspectedWindow.style.position = 'absolute';
+            inspectedWindow.style.height = '100%';
+        }
     }
     /**
      *  update inspected device view
@@ -32,7 +57,11 @@
         updateFrameHeight();
         if (data.meta.scrollTop !== undefined) {
             // update some metas only
-            window.scrollTo(0, data.meta.scrollTop);
+            if (isMobile) {
+                window.scrollTo(0, data.meta.scrollTop);
+            } else {
+                ispWin.scrollTo(0, data.meta.scrollTop)
+            }
         }
         if (data.meta.consoles) {
             var consoles = data.meta.consoles;
