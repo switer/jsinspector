@@ -101,6 +101,7 @@
         var doc = document.documentElement,
             scripts = slice.call(doc.querySelectorAll('script')),
             styleSheets = slice.call(doc.querySelectorAll('link')),
+            styles = slice.call(doc.querySelectorAll('style')),
             images = slice.call(doc.querySelectorAll('img')),
             inputs = slice.call(doc.querySelectorAll('input,textarea'));
             selects = slice.call(doc.querySelectorAll('select'));
@@ -113,6 +114,14 @@
         styleSheets.forEach(function (item) {
             if (item.getAttribute('href') !== item.href) {
                 item.setAttribute('href', item.href);
+            }
+        });
+        styles.forEach(function (item) {
+            if (item.innerHTML && item.innerHTML.trim()) {
+                item.innerHTML = item.innerHTML.replace(
+                    /url\(([\'\"])*[/]*(?!http:\/\/|data:|https:\/\/)/g, 
+                    'url($1' + location.origin + '/'
+                );
             }
         });
         images.forEach(function (item) {
@@ -408,7 +417,7 @@
             }, function (err, xhr) {
 
                 if (xhr.status == 400) { // session is out of date
-                    alert(err);
+                    // alert(err);
                 } else if (retryTimes >= MAX_RETRY_TIMES) { // max retry times
                     alert(err || 'network error!');
                 } else { // retry
