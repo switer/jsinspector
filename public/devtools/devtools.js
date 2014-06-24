@@ -85,9 +85,15 @@
          *  Sync the view port from the iframe
          **/
         var viewport = slice.call(ispDoc.querySelectorAll('meta[name="viewport"]') || []);
-        viewport.forEach(function (item) {
-            document.head.appendChild(item.cloneNode(true));
-        });
+        if (viewport && viewport.length) {
+            var originViewports = slice.call(document.querySelectorAll('meta[name="viewport"]'));
+            originViewports.forEach(function (item) {
+                item.parentNode.removeChild(item);
+            });
+            viewport.forEach(function (item) {
+                document.head.appendChild(item.cloneNode(true));
+            });
+        }
     }
     /**
      *  Get init document content from jsinpsctor server as base document for delta download

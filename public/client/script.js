@@ -117,10 +117,10 @@
             }
         });
         styles.forEach(function (item) {
-            if (item.innerHTML && item.innerHTML.trim()) {
+            if (item.innerHTML) {
                 item.innerHTML = item.innerHTML.replace(
-                    /url\(([\'\"])*[/]*(?!http:\/\/|data:|https:\/\/)/g, 
-                    'url($1' + location.origin + '/'
+                    /url\(([\'\"])*[\/]*(?!http:\/\/|data:|https:\/\/)/g, 
+                    'url($1' + window.location.protocol + '//' + window.location.host + '/'
                 );
             }
         });
