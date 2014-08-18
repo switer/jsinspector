@@ -69,6 +69,8 @@ code {font-family: Consolas, 'Liberation Mono', Courier, monospace;color: #534C4
 .doc-desc {line-height: 40px;text-align: left;color: rgb(83, 74, 74)    ;margin-bottom: 10px;}
 .doc-hl {color: #1f8dd6;}
 
+.comments {width: 750px;margin: auto;margin-bottom: 100px;}
+
 .footer {text-align: center;background-color: #1f8dd6;color: white;line-height: 35px;padding-top: 50px;
     padding-bottom: 70px;font-size: 100%}
     .footer a {color: white;text-decoration: underline;}
