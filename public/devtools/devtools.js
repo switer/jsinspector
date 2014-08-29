@@ -94,6 +94,17 @@
                 document.head.appendChild(item.cloneNode(true));
             });
         }
+
+        var jsiHrefs = Array.prototype.slice.call(ispDoc.querySelectorAll('[jsi-href]')),
+            jsiSrcs = Array.prototype.slice.call(ispDoc.querySelectorAll('[jsi-src]'));
+        jsiHrefs.forEach(function (item) {
+            item.setAttribute('href', item.getAttribute('jsi-href'));
+            item.removeAttribute('jsi-href');
+        })
+        jsiSrcs.forEach(function (item) {
+            item.setAttribute('src', item.getAttribute('jsi-src'));
+            item.removeAttribute('jsi-src');
+        })
     }
     /**
      *  Get init document content from jsinpsctor server as base document for delta download

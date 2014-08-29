@@ -206,7 +206,7 @@ app.get('/devtools/init', inspectorIdParse, function (req, res) {
 });
 
 /* =================================================================== */
-var port = Number(process.env.PORT || 5000);
+var port = Number(process.env.PORT || 5050);
 server.listen(port, function() {
   console.log("Listening on " + port);
 });

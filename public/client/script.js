@@ -112,8 +112,8 @@
             item.src = '';
         });
         styleSheets.forEach(function (item) {
-            if (item.getAttribute('href') !== item.href) {
-                item.setAttribute('href', item.href);
+            if (item.getAttribute('href') !== item.href && !item.getAttribute('jsi-href')) {
+                item.setAttribute('jsi-href', item.href);
             }
         });
         styles.forEach(function (item) {
@@ -125,8 +125,8 @@
             }
         });
         images.forEach(function (item) {
-            if (item.getAttribute('src') !== item.src) {
-                item.setAttribute('src', item.src);
+            if (item.getAttribute('src') !== item.src && !item.getAttribute('jsi-src')) {
+                item.setAttribute('jsi-src', item.src);
             }
         });
         inputs.forEach(function (item) {
