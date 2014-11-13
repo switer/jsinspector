@@ -72,13 +72,13 @@
 
         /* =================================================================== */
         /*global error handle*/
-        exports.insp_errorHandler = function (error) {
+        exports.insp_errorHandler = function (errorEvent) {
             var args = [
-                error.message + '    %c' + error.filename + ':' + error.lineno, 
+                errorEvent.message + '    %c' + errorEvent.filename + ':' + errorEvent.lineno, 
                 'color:gray;'
             ];
-            if (error.stack) {
-                args.push(error.stack);
+            if (errorEvent.error && errorEvent.error.stack) {
+                args.push(errorEvent.error.stack);
             }
             insp_logHandler('error', args, true);
         };

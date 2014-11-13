@@ -79,7 +79,8 @@ app.get('/inspector', inspectorIdParse, function (req, res) {
     var script = readFile('./public/client/script.js', 'utf-8'),
         jsonify = readFile('./public/client/jsonify.js', 'utf-8');
         consoleJS = readFile('./public/client/console.js', 'utf-8');
-    res.setHeader('Content-type', 'application/javascript');
+    res.setHeader('Content-Type', 'application/javascript');
+    res.setHeader('Access-Control-Allow-Origin', 'http://' + req.headers.host);
     res.send(ejs.render(script, {
         host: 'http://' + req.headers.host,
         inspectorId: req.inspectorId,

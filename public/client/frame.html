@@ -6,24 +6,25 @@
 </head>
 <body>
     <script>
-        var notWorker = false;
-        try {
-            var worker = new Worker('./workers.js'),
-                parentWindow;
+        var notWorker = true;
+        // var notWorker = false;
+        // try {
+        //     var worker = new Worker('./workers.js'),
+        //         parentWindow;
 
-            this.addEventListener('message', function (event) {
-                parentWindow = event.source;
-                worker.postMessage(event.data);
-            });
+        //     this.addEventListener('message', function (event) {
+        //         parentWindow = event.source;
+        //         worker.postMessage(event.data);
+        //     });
 
-            worker.onmessage = function (event) {
-                if (parentWindow) {
-                    parentWindow.postMessage(event.data, '*');
-                }
-            }
-        } catch (e) {
-            notWorker = true;
-        }
+        //     worker.onmessage = function (event) {
+        //         if (parentWindow) {
+        //             parentWindow.postMessage(event.data, '*');
+        //         }
+        //     }
+        // } catch (e) {
+        //     notWorker = true;
+        // }
 
         /* =================================================================== */
         /**

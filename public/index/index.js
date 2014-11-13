@@ -19,7 +19,7 @@
     }
 
     function createScript () {
-        var script = '<script src="{{host}}/inspector?{{inspectId}}"></script>',
+        var script = '<script src="{{host}}/inspector?{{inspectId}}" crossorigin></script>',
             $scriptContainer = document.querySelector('#script'),
             code = script.replace('{{host}}', window.location.origin)
                         .replace('{{inspectId}}', UUID())
