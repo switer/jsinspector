@@ -42,7 +42,7 @@ app.use(compress());
  *  Global CORS
  **/
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://' + req.headers.host);
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin ? req.headers.origin:'*');
     res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,HEAD,GET,OPTIONS,PATCH');
     next();
 })
@@ -83,10 +83,11 @@ function rawBody(req, res, next) {
  **/
 app.get('/inspector', inspectorIdParse, function (req, res) {
     var script = readFile('./public/client/script.js', 'utf-8'),
-        jsonify = readFile('./public/client/jsonify.js', 'utf-8');
+        jsonify = readFile('./public/client/jsonify.js', 'utf-8'),
         consoleJS = readFile('./public/client/console.js', 'utf-8');
+
     res.setHeader('Content-Type', 'application/javascript');
-    res.setHeader('Access-Control-Allow-Origin', 'http://' + req.headers.host);
+
     res.send(ejs.render(script, {
         host: 'http://' + req.headers.host,
         inspectorId: req.inspectorId,
