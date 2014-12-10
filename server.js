@@ -36,9 +36,16 @@ if (!fs.existsSync('/tmp')) {
     fs.mkdirSync('/tmp');
 }
 /* =================================================================== */
-
 app.use(logfmt.requestLogger());
 app.use(compress());
+/**
+ *  Global CORS
+ **/
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', 'http://' + req.headers.host);
+    res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,HEAD,GET,OPTIONS,PATCH');
+    next();
+})
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser());
 
@@ -69,7 +76,6 @@ function rawBody(req, res, next) {
     next();
   });
 }
-
 
 /* =================================================================== */
 /**
