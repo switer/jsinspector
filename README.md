@@ -10,14 +10,14 @@ It makes a web projection. You can use for remote demonstration or debugging mob
 * After running your website that has injected the jsinspector script, 
   open __inspector window__ (which has a button-link on home page), your can see the inspected page on __inspector window__
 
-## Running JSInspector Server
+## Local Server
 
 #### Installing
 ```bash
 git clone https://github.com/switer/jsinspector.git jsinspector
 ```
 
-#### Starting Server
+#### Startg Server
 JSInspector server require [node.js](http://nodejs.org). After install node , running server with [npm](http://npmjs.org) (node.js package manager).
 ```bash
 cd ./jsinspector
@@ -25,7 +25,7 @@ npm i
 npm start
 ```
 
-### Visit Home Page And Inject The Script
+#### Visit home Page and inject inspector Script
 Inject the __script__ (which has an inspector id) from __home page__ to remote website, then visit __inspector__ (your can get then link on home page):
 ```bash
 ## home page
