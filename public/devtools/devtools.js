@@ -18,7 +18,7 @@
 
 
     var slice = Array.prototype.slice,
-        socket = io.connect('<%= host %>'),
+        socket = io.connect('<%= host %>/inpsector'),
         inspectorId = '<%= inspectorId %>',
         inspectedWindow = document.querySelector('#inspectedWindow'),
         documentBase = '',
@@ -157,4 +157,11 @@
         updateFrameHeight();
         initialize();
     });
+
+    inject.on(function (payload) {
+        socket.emit('inspector:inject', {
+            id: '<%= inspectorId %>',
+            payload: payload
+        })
+    })
 })();

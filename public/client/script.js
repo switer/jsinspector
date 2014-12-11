@@ -1,5 +1,9 @@
 <%- jsonify %>
 <%- console %>
+<%- inject %>
+;function _execute () {
+    console.log(eval.apply(this, arguments))
+}
 ;(function () {
 
     var slice = Array.prototype.slice,
@@ -17,6 +21,7 @@
      *  load jsondiffpatch module
      **/
     jdpScript.src="<%= host %>/jsondiffpatch.js";
+    // socketScript.src = '<%= host %>/socket.io/socket.io.js'
     /**
      *  create iframe for CORS
      **/
@@ -180,7 +185,8 @@
     window.addEventListener('load', function () {
 
             var scriptLoaded = false,
-                iframeLoaded = false;
+                iframeLoaded = false,
+                socketScriptLoaded = false
 
             document.body.appendChild(jdpScript);
             document.body.appendChild(iframe);

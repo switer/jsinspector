@@ -9,6 +9,7 @@ var express = require('express'),
     app = new express(),
     server = http.createServer(app),
     io = require('socket.io').listen(server),
+    client = express(),
     jsondiffpatch = require('jsondiffpatch').create({
         textDiff: {
             minLength: 60
@@ -20,7 +21,7 @@ var session = {};
 /**
  *  uitl functions
  **/
-function readFile (path) {
+function readFile(path) {
     if (fs.existsSync(path)) {
         return fs.readFileSync(path, 'utf-8');
     } else {
@@ -36,13 +37,13 @@ if (!fs.existsSync('/tmp')) {
     fs.mkdirSync('/tmp');
 }
 /* =================================================================== */
-app.use(logfmt.requestLogger());
+// app.use(logfmt.requestLogger());
 app.use(compress());
 /**
  *  Global CORS
  **/
-app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin ? req.headers.origin:'*');
+app.use(function(req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin ? req.headers.origin : '*');
     res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,HEAD,GET,OPTIONS,PATCH');
     next();
 })
@@ -58,7 +59,7 @@ app.use(bodyParser());
 /**
  *  Get inpsector form url
  **/
-function inspectorIdParse (req, res, next) {
+function inspectorIdParse(req, res, next) {
     var search = url.parse(req.url).search;
     search && (req.inspectorId = search.replace(/^\?/, '').split('&')[0]);
     next();
@@ -67,38 +68,41 @@ function inspectorIdParse (req, res, next) {
  *  Post body parse
  **/
 function rawBody(req, res, next) {
-  req.setEncoding('utf8');
-  req.rawBody = '';
-  req.on('data', function(chunk) {
-    req.rawBody += chunk;
-  });
-  req.on('end', function(){
-    next();
-  });
+    req.setEncoding('utf8');
+    req.rawBody = '';
+    req.on('data', function(chunk) {
+        req.rawBody += chunk;
+    });
+    req.on('end', function() {
+        next();
+    });
 }
 
 /* =================================================================== */
 /**
  *  Client routes
  **/
-app.get('/inspector', inspectorIdParse, function (req, res) {
+app.get('/inspector', inspectorIdParse, function(req, res) {
     var script = readFile('./public/client/script.js', 'utf-8'),
         jsonify = readFile('./public/client/jsonify.js', 'utf-8'),
-        consoleJS = readFile('./public/client/console.js', 'utf-8');
+        consoleJS = readFile('./public/client/console.js', 'utf-8'),
+        inject = readFile('./public/client/inject.js', 'utf-8')
 
     res.setHeader('Content-Type', 'application/javascript');
 
+    var host = 'http://' + req.headers.host
     res.send(ejs.render(script, {
-        host: 'http://' + req.headers.host,
+        host: host,
         inspectorId: req.inspectorId,
         jsonify: jsonify,
-        console: consoleJS
+        console: consoleJS,
+        inject: ejs.render(inject, {host: host, inspectorId: req.inspectorId})
     }));
 });
 /**
  *  Use for client CORS prox
  **/
-app.get('/src', function (req, res) {
+app.get('/src', function(req, res) {
     var srcUrl = req.query.url.replace(/"/g, '');
     if (!srcUrl) {
         // Bad Request
@@ -106,10 +110,10 @@ app.get('/src', function (req, res) {
         return;
     }
     http.get(srcUrl, function(resp) {
-        resp.on('data', function (data) {
-            res.write(data); 
+        resp.on('data', function(data) {
+            res.write(data);
         });
-        resp.on('end', function () {
+        resp.on('end', function() {
             res.end();
         });
     }).on('error', function(e) {
@@ -119,7 +123,7 @@ app.get('/src', function (req, res) {
 /**
  *  Client document upload API
  **/
-app.post('/html/init', inspectorIdParse, rawBody, function (req, res) {
+app.post('/html/init', inspectorIdParse, rawBody, function(req, res) {
     var content = req.rawBody,
         updatedData = JSON.parse(content);
 
@@ -132,7 +136,7 @@ app.post('/html/init', inspectorIdParse, rawBody, function (req, res) {
     io.sockets.emit('inspected:html:update:' + req.inspectorId, content);
     res.send(200, 'ok');
 });
-app.post('/html/delta', inspectorIdParse, rawBody, function (req, res) {
+app.post('/html/delta', inspectorIdParse, rawBody, function(req, res) {
     var content = req.rawBody,
         updatedData = JSON.parse(content), // currently upload data
         lastTmpData, // last time update data
@@ -177,7 +181,7 @@ app.post('/html/delta', inspectorIdParse, rawBody, function (req, res) {
     /**
      *  devtools sync
      **/
-    io.sockets.emit('inspected:html:update:' + req.inspectorId, syncData);
+    inspectorSocket.emit('inspected:html:update:' + req.inspectorId, syncData);
 
     res.send(200, 'ok');
 });
@@ -186,7 +190,7 @@ app.post('/html/delta', inspectorIdParse, rawBody, function (req, res) {
 /**
  *  Inspctor routes
  **/
-app.get('/devtools', inspectorIdParse, function (req, res, next) {
+app.get('/devtools', inspectorIdParse, function(req, res, next) {
     if (!req.inspectorId) {
         res.redirect('/');
         return;
@@ -204,7 +208,7 @@ app.get('/devtools', inspectorIdParse, function (req, res, next) {
         devtools: script
     }));
 });
-app.get('/devtools/init', inspectorIdParse, function (req, res) {
+app.get('/devtools/init', inspectorIdParse, function(req, res) {
     var file = readFile('tmp/inspector_html_' + req.inspectorId + '.json');
     if (file) {
         res.send(file);
@@ -216,10 +220,17 @@ app.get('/devtools/init', inspectorIdParse, function (req, res) {
 /* =================================================================== */
 var port = Number(process.env.PORT || 5050);
 server.listen(port, function() {
-  console.log("Listening on " + port);
+    console.log("Inspector server listening on " + port);
 });
 
 /* =================================================================== */
 /* Socket.io */
 io.set('log level', 1);
-io.sockets.on('connection', function (socket) {});
+var inspectorSocket = io.of('/inpsector')
+var clientSocket = io.of('/client')
+inspectorSocket.on('connection', function(socket) {
+    socket.on('inspector:inject', function (data) {
+        clientSocket.emit('client:inject:' + data.id, data.payload)
+    })
+});
+clientSocket.on('connection', function (){})

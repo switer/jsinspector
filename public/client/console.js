@@ -10,19 +10,18 @@
         // mark as inited
         exports.insp_console_inited = true;
 
-        exports.native_console = {
-            log: console.log,
-            clear: console.log,
-            error: console.error,
-            info: console.info,
-            warn: console.warn,
-            time: console.time,
-            timeEnd: console.timeEnd,
-        }
+        var proxyMethods = ['log', 'clear', 'error', 'info', 'warn', 'time', 'timeEnd']
+        /**
+         *  Saving native methods
+         **/
+        proxyMethods.forEach(function (m) {
+            console['_' + m] = console[m]
+        })
+
         exports.insp_consoles = [];
         exports.insp_times = {};
         exports.insp_log = function(type, args) {
-            native_console[type].apply(console, args);
+            console['_'+type].apply(console, args)
         }
         exports.insp_logHandler = function (type, args, noLocal) {
             !noLocal && insp_log(type, args);
@@ -41,22 +40,17 @@
                 args: JSON.stringify(args)
             });
         }
-
-        console.log = function () {
-            insp_logHandler('log', arguments);
+        function logHandler (type) {
+            return function () {
+                insp_logHandler(type, arguments);
+            }
         }
-        console.clear = function () {
-            insp_logHandler('clear', arguments);
-        }
-        console.error = function () {
-            insp_logHandler('error', arguments);
-        }
-        console.info = function () {
-            insp_logHandler('info', arguments);
-        }
-        console.warn = function () {
-            insp_logHandler('warn', arguments);
-        }
+        /**
+         *  console methods override  
+         **/
+        proxyMethods.forEach(function (m) {
+            console[m] = logHandler(m)
+        })
         console.time = function (name) {
             insp_times[name] = Date.now();
         }
@@ -67,7 +61,6 @@
         }
         // init clear console
         console.clear();
-
 
 
         /* =================================================================== */
