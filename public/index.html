@@ -78,12 +78,28 @@
         </script>
         <div class="doc-title text-hl">Features</div>
         <div class="doc-desc">
+            <h4>Inject codes to client</h4>
+            <div>use <strong>inject</strong> api , so you can inject the code from devtools <strong>console</strong> to client side.
+            Tap the code in <strong>devtools</strong> website's <strong>console</strong> panel:</div>
+            <script class="ta-l f-sm lh-sm" type="text/colo-js">
+                // inject()
+                inject('console.log("window")') // will get window object form client side
+                inject('console.log("%s","%s")', 'document', 'window') // also support placeholder
+
+                // inject.js()
+                inject.js('http://yourhost/lib.js') // will inject that script resource to client side
+
+                // inject.css()
+                inject.css('http://yourhost/style.css') // will inject that stylesheet resource to client side
+            </script>
+
             <h4>HTML sync</h4>
             <div>is the primary feature, all the html of client will be synchroized to remote server and can be view on 
             <strong>inspector</strong> window (eg. http://yourhost/devtools?xxxx-xxxxx).</div>
+
             <h4>Console sync</h4>
             <div>
-                support console: `log`, `clear`, `error`, `info`, `warn`, `time` and `timeEnd`, these console api will be synchroized and show in inspector's `devtool-console panel`.
+                support console: <strong>log</strong>, <strong>clear</strong>, <strong>error</strong>, <strong>info</strong>, <strong>warn</strong>, <strong>time</strong> and <strong>timeEnd</strong>, these console api will be synchroized and show in inspector's <strong>devtool-console panel</strong>.
                 <p>It support every object to console.log, such as:</p>
                 <script class="ta-l f-sm lh-sm" type="text/colo-js">
                     // global object
@@ -104,6 +120,7 @@
                     console.log(document.body.childNodes[0]); // -> "\r\nxxxx"
                 </script>
             </div>
+            
             <h4>Exceptions sync</h4>
             <div>use `window.onerror`(window.addEventListener('error')) to catch global exceptions. Those error will be synchroized in inspector's `devtool-console panel`. use output format: `console.error(error, src + lineNumber)`</div>
         </div>

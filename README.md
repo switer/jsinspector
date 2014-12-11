@@ -3,7 +3,7 @@
 Synchronize DOMContent, Console(logs) and Errors from remote browser.
 It makes a web projection. You can use for remote demonstration or debugging mobile web app.
 
-## Quickly Started
+## Get Started
 
 * Visit __jsinspector__ [home page](http://jsinspector.com/)
 * Inject the __script__ which from home page to your webapp's html
@@ -35,8 +35,24 @@ https://yourhost:port/devtools?xxx-xxx
 ```
 
 ## Features
+
+#### Inject codes to client
+use `inject` api , so you can inject the code from devtools `console` to client side.
+Tap the code in `devtools` website's `console` panel:
+```js
+
+// inject()
+inject('console.log("window")') // will get window object form client side
+inject('console.log("%s","%s")', 'document', 'window') // also support placeholder
+
+// inject.js()
+inject.js('http://yourhost/lib.js') // will inject that script resource to client side
+
+// inject.css()
+inject.css('http://yourhost/style.css') // will inject that stylesheet resource to client side
+```
 #### HTML sync
-is the primary feature, all the html of client will be synchroized to remote server and can be view on
+This is the primary feature, all the html of client will be synchroized to remote server and can be view on
 __inspector__ window(eg. http://yourhost/devtools?xxxx-xxxxx).
 
 #### Console sync
