@@ -4,7 +4,6 @@
     socketScript.onload = function () {
         var socket = io.connect('<%= host %>/client')
         socket.on('client:inject:<%= inspectorId %>', function (payload) {
-            native_console.log.call(console, payload)
             switch (payload.type) {
                 case 'eval': _execute(payload.value);break;
                 case 'js': 

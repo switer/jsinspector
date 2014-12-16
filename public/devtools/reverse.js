@@ -4,6 +4,9 @@
 !function (exports) {
     'use strict;'
 
+    var type = function (obj) {
+        return Object.prototype.toString.call(obj).match(/object ([a-zA-Z]+)/)[1].toLowerCase()
+    }
     function commander () {
         var args = Array.prototype.slice.call(arguments);
         var command = args.shift();
@@ -13,7 +16,12 @@
         return command;
     }
     var inject = function () {
-        var command = commander.apply(null, arguments)
+        var command;
+        if (type(arguments[0]) == 'function') {
+            command = '(' + arguments[0].toString() + ')()'
+        } else {
+            command = commander.apply(null, arguments)
+        }
         inject.push({
             type: 'eval',
             value: command
