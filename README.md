@@ -45,6 +45,12 @@ Tap the code in `devtools` website's `console` panel:
 inject('console.log("window")') // will get window object form client side
 inject('console.log("%s","%s")', 'document', 'window') // also support placeholder
 
+// inject() block codes 
+inject(function () {
+    console.log(document) // will get document object form client side
+    console.log(window) // will get window object form client side
+})
+
 // inject.js()
 inject.js('http://yourhost/lib.js') // will inject that script resource to client side
 

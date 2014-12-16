@@ -1,0 +1,11 @@
+{
+    "name": "static-server",
+    "version": "0.0.0",
+    "scripts": {
+        "start": "node server"
+    },
+    "dependencies": {
+        "express": "*",
+        "colors":"*"
+    }
+}
