@@ -42,13 +42,13 @@ Tap the code in `devtools` website's `console` panel:
 ```js
 
 // inject()
-inject('console.log("window")') // will get window object form client side
+inject('console.log("window")') // will get window object from client side
 inject('console.log("%s","%s")', 'document', 'window') // also support placeholder
 
-// inject() block codes 
+// inject() code block  
 inject(function () {
-    console.log(document) // will get document object form client side
-    console.log(window) // will get window object form client side
+    console.log(document) // will get document object from client side
+    console.log(window) // will get window object from client side
 })
 
 // inject.js()

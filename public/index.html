@@ -83,9 +83,13 @@
             Tap the code in <strong>devtools</strong> website's <strong>console</strong> panel:</div>
             <script class="ta-l f-sm lh-sm" type="text/colo-js">
                 // inject()
-                inject('console.log("window")') // will get window object form client side
+                inject('console.log("window")') // will get window object from client side
                 inject('console.log("%s","%s")', 'document', 'window') // also support placeholder
-
+                // inject() code block  
+                inject(function () {
+                    console.log(document) // will get document object from client side
+                    console.log(window) // will get window object from client side
+                })
                 // inject.js()
                 inject.js('http://yourhost/lib.js') // will inject that script resource to client side
 
