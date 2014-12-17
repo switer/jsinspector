@@ -18,15 +18,20 @@
         return text;
     }
 
-    function jsonify (obj) {
+    function jsonify (obj, _time) {
         var jsonObj,
             type = objType(obj);
 
+        !_time && (_time = 0);
         try {
             if (type == 'Undefined') {
-                jsonObj = 'undefined';
+                jsonObj = undefined;
             } else if (obj !== obj) {
                 jsonObj = 'NaN';
+            } else if (type == 'String') {
+                jsonObj = textOmit(obj);
+            } else if (type == 'Null' || type == 'Number' || type == 'Boolean') {
+                jsonObj = obj;
             } else {
                 jsonObj = JSON.parse(JSON.stringify(obj));
             }
@@ -41,30 +46,31 @@
                 obj = slice.call(obj);
 
                 obj.forEach(function (item) {
-                    array.push(jsonify(item));
+                    if (_time >= 2 ) {
+                        array.push(objType(item))
+                    } else {
+                        array.push(jsonify(item, _time + 1));
+                    }
                 });
                 jsonObj = array;
-            } else if (type == 'Object') {
+            } else if (type == 'Object' || type == 'global' || type == 'HTMLDocument') {
                 var keys = Object.keys(obj),
                     object = {};
                 keys.forEach(function (key) {
-                    object[key] = jsonify(obj[key]);
+                    if (!obj.hasOwnProperty(key)) return
+                    if (_time >= 2 ) {
+                        object[key] = (objType(obj[key]))
+                    } else {
+                        object[key] = jsonify(obj[key], _time + 1);
+                    }
                 });
                 jsonObj = object;
             } else if (type == 'Function') {
                 jsonObj = textOmit(obj.toString());
-            } else if (type == 'global' || type == 'HTMLDocument') {
-                var keys = Object.keys(obj),
-                    object = {};
-                keys.forEach(function (key) {
-                    object[key] = objType(obj[key]);
-                });
-                jsonObj = object;
             } else {
                 jsonObj = toString.call(obj); 
             }
         }
-
         return jsonObj;
     }
 
