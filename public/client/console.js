@@ -3,12 +3,14 @@
  **/
 !function (exports) {
     'use strict;'
+
     if (!exports.insp_console_inited) {
         var slice = Array.prototype.slice;
         function NOOP () {}
 
         // mark as inited
         exports.insp_console_inited = true;
+        exports.insp_consoles = [];
 
         var proxyMethods = ['log', 'clear', 'error', 'info', 'warn', 'time', 'timeEnd']
         /**
@@ -18,12 +20,10 @@
             console['_' + m] = console[m] || NOOP
         })
 
-        exports.insp_consoles = [];
-        exports.insp_times = {};
-        exports.insp_log = function(type, args) {
+        function insp_log (type, args) {
             console['_'+type].apply(console, args)
         }
-        exports.insp_logHandler = function (type, args, noLocal) {
+        function insp_logHandler (type, args, noLocal) {
             !noLocal && insp_log(type, args);
 
             args = slice.call(args);
@@ -51,6 +51,8 @@
         proxyMethods.forEach(function (m) {
             console[m] = logHandler(m)
         })
+        
+        var insp_times = {};
         console.time = function (name) {
             insp_times[name] = Date.now();
         }
