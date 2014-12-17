@@ -1,11 +1,10 @@
-<%- jsonify %>
-<%- console %>
-<%- inject %>
+;<%- jsonify %>
+;<%- console %>
+;<%- inject %>
 ;function _execute () {
     console.log(eval.apply(this, arguments))
 }
 ;(function () {
-
     var slice = Array.prototype.slice,
         toString = Object.prototype.toString,
         iframe = document.createElement('iframe'),

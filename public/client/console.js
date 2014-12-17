@@ -3,9 +3,9 @@
  **/
 !function (exports) {
     'use strict;'
-
     if (!exports.insp_console_inited) {
         var slice = Array.prototype.slice;
+        function NOOP () {}
 
         // mark as inited
         exports.insp_console_inited = true;
@@ -15,7 +15,7 @@
          *  Saving native methods
          **/
         proxyMethods.forEach(function (m) {
-            console['_' + m] = console[m]
+            console['_' + m] = console[m] || NOOP
         })
 
         exports.insp_consoles = [];
@@ -61,7 +61,6 @@
         }
         // init clear console
         console.clear();
-
 
         /* =================================================================== */
         /*global error handle*/
