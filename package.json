@@ -4,8 +4,10 @@
   "description": "JS Web Inspector",
   "main": "index.js",
   "scripts": {
-    "test": "node test",
     "start": "npm i && node server.js"
+  },
+  "bin": {
+    "jsinspector": "bin/jsinspector"
   },
   "repository": {
     "type": "git",
