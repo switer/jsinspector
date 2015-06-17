@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node test",
-    "start": "npm i && node server.js",
-    "bin-test": "node ./bin/jsinspector server"
+    "start": "npm install & node bin/jsinspector"
   },
   "bin": {
     "insp": "./bin/jsinspector",

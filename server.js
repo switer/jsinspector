@@ -5,6 +5,7 @@ var express = require('express'),
     http = require('http'),
     compress = require('compression'),
     bodyParser = require('body-parser'),
+    rawBody = require('./middleware/rawbody')
     logfmt = require("logfmt"),
     app = new express(),
     server = http.createServer(app),
@@ -37,7 +38,6 @@ if (!fs.existsSync('/tmp')) {
     fs.mkdirSync('/tmp');
 }
 /* =================================================================== */
-// app.use(logfmt.requestLogger());
 app.use(compress());
 /**
  *  Global CORS
@@ -48,7 +48,8 @@ app.use(function(req, res, next) {
     next();
 })
 app.use(express.static(__dirname + '/public'));
-app.use(bodyParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
 
 /* =================================================================== */
@@ -63,19 +64,6 @@ function inspectorIdParse(req, res, next) {
     var search = url.parse(req.url).search;
     search && (req.inspectorId = search.replace(/^\?/, '').split('&')[0]);
     next();
-}
-/**
- *  Post body parse
- **/
-function rawBody(req, res, next) {
-    req.setEncoding('utf8');
-    req.rawBody = '';
-    req.on('data', function(chunk) {
-        req.rawBody += chunk;
-    });
-    req.on('end', function() {
-        next();
-    });
 }
 
 /* =================================================================== */
