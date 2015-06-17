@@ -217,13 +217,10 @@ app.get('/devtools/init', inspectorIdParse, function(req, res) {
     }
 });
 
-/* =================================================================== */
-var port = Number(process.env.PORT || 5050);
-server.listen(port, function() {
-    console.log("Inspector server listening on " + port);
-});
+// var port = Number(process.env.PORT || 5050);
 
-/* =================================================================== */
+module.exports = server
+
 /* Socket.io */
 io.set('log level', 1);
 var inspectorSocket = io.of('/inpsector')
