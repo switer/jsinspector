@@ -1,24 +1,25 @@
-var express = require('express'),
-    fs = require('fs'),
-    ejs = require('ejs'),
-    url = require('url'),
-    http = require('http'),
-    compress = require('compression'),
-    bodyParser = require('body-parser'),
-    rawBody = require('./middleware/rawbody')
-    logfmt = require("logfmt"),
-    app = new express(),
-    server = http.createServer(app),
-    io = require('socket.io').listen(server),
-    client = express(),
-    jsondiffpatch = require('jsondiffpatch').create({
-        textDiff: {
-            minLength: 60
-        }
-    });
-
-var session = {};
-
+var express = require('express')
+var fs = require('fs')
+var ejs = require('ejs')
+var url = require('url')
+var http = require('http')
+var compress = require('compression')
+var bodyParser = require('body-parser')
+var rawBody = require('./middleware/rawbody')
+var clientIdParser = require('./middleware/clientid-parser')
+var logfmt = require("logfmt")
+var app = new express()
+var server = http.createServer(app)
+var io = require('socket.io').listen(server)
+var jsondiffpatch = require('jsondiffpatch').create({
+    textDiff: {
+        minLength: 60
+    }
+})
+/**
+ * Memory Session
+ */
+var session = {}
 /**
  *  uitl functions
  **/
@@ -33,11 +34,9 @@ function readFile(path) {
 /**
  *  initialize
  **/
-/* =================================================================== */
 if (!fs.existsSync('/tmp')) {
     fs.mkdirSync('/tmp');
 }
-/* =================================================================== */
 app.use(compress());
 /**
  *  Global CORS
@@ -49,28 +48,19 @@ app.use(function(req, res, next) {
 })
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-
-
-/* =================================================================== */
-/**
- *  Middlewares
- **/
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 
 /**
  *  Get inpsector form url
  **/
-function inspectorIdParse(req, res, next) {
-    var search = url.parse(req.url).search;
-    search && (req.inspectorId = search.replace(/^\?/, '').split('&')[0]);
-    next();
-}
 
 /* =================================================================== */
 /**
  *  Client routes
  **/
-app.get('/inspector', inspectorIdParse, function(req, res) {
+app.get('/inspector', clientIdParser, function(req, res) {
     var script = readFile('./public/client/script.js', 'utf-8'),
         jsonify = readFile('./public/client/jsonify.js', 'utf-8'),
         consoleJS = readFile('./public/client/console.js', 'utf-8'),
@@ -84,7 +74,10 @@ app.get('/inspector', inspectorIdParse, function(req, res) {
         inspectorId: req.inspectorId,
         jsonify: jsonify,
         console: consoleJS,
-        inject: ejs.render(inject, {host: host, inspectorId: req.inspectorId})
+        inject: ejs.render(inject, {
+            host: host,
+            inspectorId: req.inspectorId
+        })
     }));
 });
 /**
@@ -111,7 +104,7 @@ app.get('/src', function(req, res) {
 /**
  *  Client document upload API
  **/
-app.post('/html/init', inspectorIdParse, rawBody, function(req, res) {
+app.post('/html/init', clientIdParser, rawBody, function(req, res) {
     var content = req.rawBody,
         updatedData = JSON.parse(content);
 
@@ -124,7 +117,8 @@ app.post('/html/init', inspectorIdParse, rawBody, function(req, res) {
     io.sockets.emit('inspected:html:update:' + req.inspectorId, content);
     res.send(200, 'ok');
 });
-app.post('/html/delta', inspectorIdParse, rawBody, function(req, res) {
+
+app.post('/html/delta', clientIdParser, rawBody, function(req, res) {
     var content = req.rawBody,
         updatedData = JSON.parse(content), // currently upload data
         lastTmpData, // last time update data
@@ -178,7 +172,7 @@ app.post('/html/delta', inspectorIdParse, rawBody, function(req, res) {
 /**
  *  Inspctor routes
  **/
-app.get('/devtools', inspectorIdParse, function(req, res, next) {
+app.get('/devtools', clientIdParser, function(req, res, next) {
     if (!req.inspectorId) {
         res.redirect('/');
         return;
@@ -191,12 +185,11 @@ app.get('/devtools', inspectorIdParse, function(req, res, next) {
         host: host.match(/^http\:/) ? host : 'http://' + host,
         inspectorId: req.inspectorId
     });
-
     res.send(ejs.render(html, {
         devtools: script
     }));
 });
-app.get('/devtools/init', inspectorIdParse, function(req, res) {
+app.get('/devtools/init', clientIdParser, function(req, res) {
     var file = readFile('tmp/inspector_html_' + req.inspectorId + '.json');
     if (file) {
         res.send(file);
@@ -205,8 +198,6 @@ app.get('/devtools/init', inspectorIdParse, function(req, res) {
     }
 });
 
-// var port = Number(process.env.PORT || 5050);
-
 module.exports = server
 
 /* Socket.io */
@@ -214,8 +205,8 @@ io.set('log level', 1);
 var inspectorSocket = io.of('/inpsector')
 var clientSocket = io.of('/client')
 inspectorSocket.on('connection', function(socket) {
-    socket.on('inspector:inject', function (data) {
+    socket.on('inspector:inject', function(data) {
         clientSocket.emit('client:inject:' + data.id, data.payload)
     })
 });
-clientSocket.on('connection', function (){})
+clientSocket.on('connection', function() {})

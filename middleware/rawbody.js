@@ -1,6 +1,8 @@
 /**
  *  Post body parse
  **/
+'use strict';
+
 module.exports = function (req, res, next) {
     req.setEncoding('utf8');
     req.rawBody = '';
