@@ -3,11 +3,12 @@ var fs = require('fs')
 var ejs = require('ejs')
 var url = require('url')
 var http = require('http')
+var path = require('path')
 var compress = require('compression')
 var bodyParser = require('body-parser')
 var rawBody = require('./middleware/rawbody')
 var clientIdParser = require('./middleware/clientid-parser')
-var logfmt = require("logfmt")
+var clientDir = '../public/client/'
 var app = new express()
 var server = http.createServer(app)
 var io = require('socket.io').listen(server)
@@ -34,8 +35,8 @@ function readFile(path) {
 /**
  *  initialize
  **/
-if (!fs.existsSync('/tmp')) {
-    fs.mkdirSync('/tmp');
+if (!fs.existsSync('./tmp')) {
+    fs.mkdirSync('./tmp');
 }
 app.use(compress());
 /**
@@ -46,7 +47,7 @@ app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,HEAD,GET,OPTIONS,PATCH');
     next();
 })
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/../public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
@@ -61,10 +62,10 @@ app.use(bodyParser.urlencoded({
  *  Client routes
  **/
 app.get('/inspector', clientIdParser, function(req, res) {
-    var script = readFile('./public/client/script.js', 'utf-8'),
-        jsonify = readFile('./public/client/jsonify.js', 'utf-8'),
-        consoleJS = readFile('./public/client/console.js', 'utf-8'),
-        inject = readFile('./public/client/inject.js', 'utf-8')
+    var script = readFile(path.join(clientDir, 'script.js'), 'utf-8'),
+        jsonify = readFile(path.join(clientDir, 'jsonify.js'), 'utf-8'),
+        consoleJS = readFile(path.join(clientDir, 'console.js'), 'utf-8'),
+        inject = readFile(path.join(clientDir, 'inject.js'), 'utf-8')
 
     res.setHeader('Content-Type', 'application/javascript');
 
@@ -87,7 +88,7 @@ app.get('/src', function(req, res) {
     var srcUrl = req.query.url.replace(/"/g, '');
     if (!srcUrl) {
         // Bad Request
-        res.send(400, 'Uncorrect source url, example: /src?url=xxx');
+        res.status(400).send('Uncorrect source url, example: /src?url=xxx');
         return;
     }
     http.get(srcUrl, function(resp) {
@@ -98,7 +99,7 @@ app.get('/src', function(req, res) {
             res.end();
         });
     }).on('error', function(e) {
-        res.send(500, e.message);
+        res.status(500).send(e.message);
     });
 });
 /**
@@ -115,7 +116,7 @@ app.post('/html/init', clientIdParser, rawBody, function(req, res) {
      **/
     fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', content, 'utf-8');
     io.sockets.emit('inspected:html:update:' + req.inspectorId, content);
-    res.send(200, 'ok');
+    res.status(200).send('ok');
 });
 
 app.post('/html/delta', clientIdParser, rawBody, function(req, res) {
@@ -128,7 +129,7 @@ app.post('/html/delta', clientIdParser, rawBody, function(req, res) {
      *  one inspectorId match one session
      **/
     if (updatedData.ssid != session[req.inspectorId]) {
-        res.send(400, 'Session is out of date, please reload!')
+        res.status(400).send('Session is out of date, please reload!')
         return;
     }
     /**
@@ -165,10 +166,9 @@ app.post('/html/delta', clientIdParser, rawBody, function(req, res) {
      **/
     inspectorSocket.emit('inspected:html:update:' + req.inspectorId, syncData);
 
-    res.send(200, 'ok');
+    res.send('ok');
 });
 
-/* =================================================================== */
 /**
  *  Inspctor routes
  **/
@@ -194,7 +194,7 @@ app.get('/devtools/init', clientIdParser, function(req, res) {
     if (file) {
         res.send(file);
     } else {
-        res.send(404, 'Please inject the script to your code !')
+        res.status(404).send('Please inject the script to your code !')
     }
 });
 

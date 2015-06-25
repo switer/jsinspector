@@ -2,7 +2,6 @@
 
 var commander = require('commander')
 var meta = require('../package.json')
-var server = require('../server')
 
 commander
 	.version(meta.version)
@@ -13,6 +12,7 @@ commander
 	.command('server')
 	.description('Start inspector server')
 	.action(function () {
+		var server = require('../server/index')
 		var port = commander.port || 9000
 		server.listen(port, function() {
 		    console.log("Inspector server listening on " + port)
