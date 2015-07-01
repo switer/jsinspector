@@ -9,6 +9,7 @@ var bodyParser = require('body-parser')
 var rawBody = require('./middleware/rawbody')
 var clientIdParser = require('./middleware/clientid-parser')
 var clientDir = '../public/client/'
+var tmpDir = '.tmp/'
 var app = new express()
 var server = http.createServer(app)
 var io = require('socket.io').listen(server)
@@ -35,8 +36,8 @@ function readFile(path) {
 /**
  *  initialize
  **/
-if (!fs.existsSync('./tmp')) {
-    fs.mkdirSync('./tmp');
+if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir);
 }
 app.use(compress());
 /**
@@ -114,7 +115,7 @@ app.post('/html/init', clientIdParser, rawBody, function(req, res) {
     /**
      *  save
      **/
-    fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', content, 'utf-8');
+    fs.writeFileSync(tmpDir + './inspector_html_' + req.inspectorId + '.json', content, 'utf-8');
     io.sockets.emit('inspected:html:update:' + req.inspectorId, content);
     res.status(200).send('ok');
 });
@@ -137,7 +138,7 @@ app.post('/html/delta', clientIdParser, rawBody, function(req, res) {
      *  @delta {TextDelta}
      *  @meta {Object}
      **/
-    lastTmpData = fs.readFileSync('tmp/inspector_html_' + req.inspectorId + '.json', 'utf-8');
+    lastTmpData = fs.readFileSync(tmpDir + './inspector_html_' + req.inspectorId + '.json', 'utf-8');
     lastTmpData = JSON.parse(lastTmpData);
     syncData = JSON.parse(content);
 
@@ -160,7 +161,7 @@ app.post('/html/delta', clientIdParser, rawBody, function(req, res) {
     /**
      *  save
      **/
-    fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', updatedData, 'utf-8');
+    fs.writeFileSync(tmpDir + './inspector_html_' + req.inspectorId + '.json', updatedData, 'utf-8');
     /**
      *  devtools sync
      **/
@@ -190,7 +191,7 @@ app.get('/devtools', clientIdParser, function(req, res, next) {
     }));
 });
 app.get('/devtools/init', clientIdParser, function(req, res) {
-    var file = readFile('tmp/inspector_html_' + req.inspectorId + '.json');
+    var file = readFile(tmpDir + './inspector_html_' + req.inspectorId + '.json');
     if (file) {
         res.send(file);
     } else {
