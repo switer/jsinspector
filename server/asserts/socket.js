@@ -1,8 +1,11 @@
 !function () {
-    var socketScript = document.createElement('script')
-    socketScript.src = '<%= host %>/socket.io/socket.io.js'
-    socketScript.onload = function () {
+    var script = document.createElement('script')
+
+    script.src = '<%= host %>/socket.io/socket.io.js'
+    script.onload = function () {
         var socket = io.connect('<%= host %>/client')
+        var readyEvent = new Event('connectionReady', {socket: socket})
+        
         socket.on('client:inject:<%= clientId %>', function (payload) {
             switch (payload.type) {
                 case 'eval': _execute(payload.value);
@@ -20,6 +23,9 @@
                     break;
             }
         })
+        window.addEventListener('load', function () {
+            document.dispatchEvent(readyEvent)
+        })
     }
-    document.head.appendChild(socketScript)
+    document.head.appendChild(script)
 }();

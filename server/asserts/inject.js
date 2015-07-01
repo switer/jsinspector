@@ -1,31 +1,14 @@
-;<%- jsonify %>
-;<%- console %>
-;<%- inject %>
 ;function _execute () {
     console.log(eval.apply(this, arguments))
 }
 ;(function () {
-    var slice = Array.prototype.slice,
-        toString = Object.prototype.toString,
-        iframe = document.createElement('iframe'),
-        jdpScript = document.createElement('script'),
-        inspectorId = '<%= clientId %>',
-        requestHandlers = {},
-        requestId = 0,
-        baseDocumentData,
-        dataPacketQueue = [],
-        differ;
-
-    /**
-     *  load jsondiffpatch module
-     **/
-    jdpScript.src="<%= host %>/jsondiffpatch.js";
-    /**
-     *  create iframe for CORS
-     **/
-    iframe.style.display = 'none';
-    iframe.src = '<%= host %>/client/frame.html';
-    iframe.id = '__jsinspector_cors_iframe';
+    var slice = Array.prototype.slice
+    var toString = Object.prototype.toString
+    var clientId = '<%= clientId %>'
+    var _requestHandlers = {}
+    var baseDocumentData
+    var dataPacketQueue = []
+    var differ, socket
 
     /* =================================================================== */
     /**
@@ -55,59 +38,19 @@
         }
         return matches;
     }
-    /**
-     *  replace those cross-domain stylesheet
-     **/
-    function replaceCORSStyleSheet (callback) {
-        var styleSheets = slice.call(document.styleSheets),
-            count = styleSheets.length;
-
-        styleSheets.forEach(function (item) {
-            // think of those stylesheets without cssRules as CORS 
-            if (!item.cssRules) {
-                $ajax({
-                    method: 'GET',
-                    url: '/src',
-                    data: {
-                        url: item.href
-                    }
-                }, function (styleText) {
-                    var style = document.createElement('style'),
-                        link = item.ownerNode;
-
-                    style.setAttribute('href', item.href);
-                    style.innerHTML = styleText;
-                    link.parentNode.replaceChild(style, link);
-
-                    count--;
-                    if (count <= 0) {
-                        callback && callback();
-                    }
-                }, function (err) {
-                    // TODO
-                });
-            } else {
-                count--;
-            }
-        });
-        // count to zero callback
-        if (count <= 0) {
-            callback && callback();
-        }
-    };
 
     /**
      *  Get document html
      **/
     function getDocuemnt () {
 
-        var doc = document.documentElement,
-            scripts = slice.call(doc.querySelectorAll('script')),
-            styleSheets = slice.call(doc.querySelectorAll('link')),
-            styles = slice.call(doc.querySelectorAll('style')),
-            images = slice.call(doc.querySelectorAll('img')),
-            inputs = slice.call(doc.querySelectorAll('input,textarea'));
-            selects = slice.call(doc.querySelectorAll('select'));
+        var doc = document.documentElement
+        var scripts = slice.call(doc.querySelectorAll('script'))
+        var styleSheets = slice.call(doc.querySelectorAll('link'))
+        var styles = slice.call(doc.querySelectorAll('style'))
+        var images = slice.call(doc.querySelectorAll('img'))
+        var inputs = slice.call(doc.querySelectorAll('input,textarea'))
+        var selects = slice.call(doc.querySelectorAll('select'))
 
         scripts.forEach(function (item) {
             item.innerHTML = '';
@@ -115,8 +58,8 @@
             item.src = '';
         });
         styleSheets.forEach(function (item) {
-            if (item.getAttribute('href') !== item.href && !item.getAttribute('jsi-href')) {
-                item.setAttribute('jsi-href', item.href);
+            if (item.getAttribute('href') !== item.href && !item.['_jsi-href']) {
+                item['_jsi-href'] = item.href
             }
         });
         styles.forEach(function (item) {
@@ -128,8 +71,8 @@
             }
         });
         images.forEach(function (item) {
-            if (item.getAttribute('src') !== item.src && !item.getAttribute('jsi-src')) {
-                item.setAttribute('jsi-src', item.src);
+            if (item.getAttribute('src') !== item.src && !item.['_jsi-src']) {
+                item['_jsi-src'] = item.src
             }
         });
         inputs.forEach(function (item) {
@@ -162,15 +105,15 @@
     /**
      *  use iframe for ajax CORS
      **/
-    function $ajax (options, success, error) {
+    var requestId = 0
+    function $send (options, success, error) {
         var id = requestId ++; 
         options.id = id;
-        iframe.contentWindow.postMessage(options, '*');
-
+        socket.emit('client:sync', options)
         /**
          *  register postMessage callback
          **/
-        requestHandlers[id] = {
+        _requestHandlers[id] = {
             success: success,
             error: error
         };
@@ -180,46 +123,20 @@
     /**
      *  replace cross-domain's stylesheets
      **/
-    window.addEventListener('load', function () {
-
-            var scriptLoaded = false,
-                iframeLoaded = false,
-                socketScriptLoaded = false
-
-            document.body.appendChild(jdpScript);
-            document.body.appendChild(iframe);
-
-            function onloadend () {
-                if (iframeLoaded && scriptLoaded) {
-                    differ = jsondiffpatch.create({
-                        textDiff: {
-                            // default 60, minimum string length (left and right sides) 
-                            // to use text diff algorythm: google-diff-match-patch
-                            minLength: 60
-                        }
-                    });
-                    iframeLoadEndHandler();
-                }
-            }
-            iframe.onload = function () {
-                iframeLoaded = true;
-                onloadend();
-                    
-            }
-            jdpScript.onload = function () {
-                scriptLoaded = true;
-                onloadend();
-            }
+    document.addEventListener('connectionReady', function (e) {
+        socket = e.socket
+        clientReady()
     });
-    function iframeLoadEndHandler () {
+
+    function clientReady () {
         /**
          *  receive postMessage response 
          **/
-        window.addEventListener('message', function (event) {
+        socket.on('server:push', function (event) {
             var handler,
                 data = event.data;
 
-            if (handler = requestHandlers[data.id]) {
+            if (handler = _requestHandlers[data.id]) {
                 if (data.xhr.status == 200) {
                     handler.success &&　handler.success(data.data, data.xhr);
                 } else {
@@ -240,11 +157,12 @@
                     meta: {
                         scrollTop: document.body.scrollTop
                     },
-                    inspectorId: inspectorId
+                    clientId: clientId
                 };
 
             documentUpload(uploadData, done);
         }
+
         function documentUpload (data, callback) {
             initPost(data, function () {
                 baseDocumentData = data;
@@ -255,7 +173,7 @@
         }
 
         function initPost (data, success, error) {
-            $ajax({
+            $send({
                 method: 'POST',
                 url: '/html/init?<%= clientId %>',
                 type: 'text/plain',
@@ -293,7 +211,7 @@
                     meta: {
                         scrollTop: document.body.scrollTop
                     },
-                    inspectorId: inspectorId
+                    clientId: clientId
                 };
                 sendToQueue(dataPacket);
             });
@@ -324,7 +242,7 @@
                         meta: {
                             consoles: insp_consoles,
                         },
-                        inspectorId: inspectorId
+                        clientId: clientId
                     }
                     insp_consoles = [];
                     hasConsoleCallback(dataPacket);
@@ -346,7 +264,7 @@
                     meta: {
                         scrollTop: document.body.scrollTop
                     },
-                    inspectorId: inspectorId
+                    clientId: clientId
                 }
                 // dirty checking callback
                 return dirtyDataPacket;
@@ -355,7 +273,7 @@
         }
 
         function deltaPost (data, success, error) {
-            $ajax({
+            $send({
                 method: 'POST',
                 url: '/html/delta?<%= clientId %>',
                 type: 'text/plain',
@@ -437,18 +355,6 @@
             // delta upload after base document upload done
             deltaCheckingStart();
         });
-        /*replaceCORSStyleSheet(function () {
-            var matchesRules = getMatchesRules(document.body);
-
-            $ajax({
-                method: 'POST',
-                url: '/stylesheets',
-                data: {
-                    rules: matchesRules
-                }
-            }, function () {
-            });
-        });*/
     }
 
 

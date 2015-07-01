@@ -6,6 +6,7 @@ var path = require('path')
 var express = require('express')
 var compress = require('compression')
 var bodyParser = require('body-parser')
+var cookieParser = require('cookie-parser')
 var jsondiffpatch = require('jsondiffpatch').create({
     textDiff: {
         minLength: 256
@@ -36,5 +37,8 @@ app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,HEAD,GET,OPTIONS,PATCH')
     next()
 })
+app.use(cookieParser())
+app.enable('etag')
+app.use(require('./routes/client'))
 
-app.use()
+module.exports = server
