@@ -3,9 +3,10 @@
     socketScript.src = '<%= host %>/socket.io/socket.io.js'
     socketScript.onload = function () {
         var socket = io.connect('<%= host %>/client')
-        socket.on('client:inject:<%= inspectorId %>', function (payload) {
+        socket.on('client:inject:<%= clientId %>', function (payload) {
             switch (payload.type) {
-                case 'eval': _execute(payload.value);break;
+                case 'eval': _execute(payload.value);
+                    break;
                 case 'js': 
                     var s = document.createElement('script')
                     s.src = payload.value

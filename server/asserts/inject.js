@@ -9,7 +9,7 @@
         toString = Object.prototype.toString,
         iframe = document.createElement('iframe'),
         jdpScript = document.createElement('script'),
-        inspectorId = '<%= inspectorId %>',
+        inspectorId = '<%= clientId %>',
         requestHandlers = {},
         requestId = 0,
         baseDocumentData,
@@ -20,7 +20,6 @@
      *  load jsondiffpatch module
      **/
     jdpScript.src="<%= host %>/jsondiffpatch.js";
-    // socketScript.src = '<%= host %>/socket.io/socket.io.js'
     /**
      *  create iframe for CORS
      **/
@@ -258,7 +257,7 @@
         function initPost (data, success, error) {
             $ajax({
                 method: 'POST',
-                url: '/html/init?<%= inspectorId %>',
+                url: '/html/init?<%= clientId %>',
                 type: 'text/plain',
                 data: JSON.stringify(data),
             }, success, error);
@@ -358,7 +357,7 @@
         function deltaPost (data, success, error) {
             $ajax({
                 method: 'POST',
-                url: '/html/delta?<%= inspectorId %>',
+                url: '/html/delta?<%= clientId %>',
                 type: 'text/plain',
                 data: JSON.stringify(data),
             }, success, error);
