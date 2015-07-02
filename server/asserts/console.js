@@ -2,11 +2,38 @@
  *  Console.log overide
  **/
 !function (exports) {
-    'use strict;'
+    'use strict';
 
+    var slice = Array.prototype.slice;
+
+    function NOOP () {}
+    function insp_log (type, args) {
+        console['_'+type].apply(console, args)
+    }
+    function insp_logHandler (type, args, noLocal) {
+        !noLocal && insp_log(type, args);
+
+        args = slice.call(args);
+        args.forEach(function (item, index) {
+            try {
+                args[index] = JSON.parse(JSON.stringify(item));
+            } catch (e) {
+                args[index] = jsonify(item);
+            }
+        });
+
+        insp_consoles.push({
+            type: type,
+            args: JSON.stringify(args)
+        });
+    }
+    function logHandler (type) {
+        return function () {
+            insp_logHandler(type, arguments);
+        }
+    }
+    
     if (!exports.insp_console_inited) {
-        var slice = Array.prototype.slice;
-        function NOOP () {}
 
         // mark as inited
         exports.insp_console_inited = true;
@@ -20,31 +47,6 @@
             console['_' + m] = console[m] || NOOP
         })
 
-        function insp_log (type, args) {
-            console['_'+type].apply(console, args)
-        }
-        function insp_logHandler (type, args, noLocal) {
-            !noLocal && insp_log(type, args);
-
-            args = slice.call(args);
-            args.forEach(function (item, index) {
-                try {
-                    args[index] = JSON.parse(JSON.stringify(item));
-                } catch (e) {
-                    args[index] = jsonify(item);
-                }
-            });
-
-            insp_consoles.push({
-                type: type,
-                args: JSON.stringify(args)
-            });
-        }
-        function logHandler (type) {
-            return function () {
-                insp_logHandler(type, arguments);
-            }
-        }
         /**
          *  console methods override  
          **/
@@ -57,7 +59,7 @@
             insp_times[name] = Date.now();
         }
         console.timeEnd = function (name) {
-            if (insp_times[name] == undefined) return;
+            if (insp_times[name] === undefined) return;
             var end = Date.now() - insp_times[name];
             insp_logHandler('log', ['%c' + name + ': ' + end + 'ms', 'color: blue'])
         }
@@ -65,8 +67,7 @@
         console.clear();
 
         /* =================================================================== */
-        /*global error handle*/
-        exports.insp_errorHandler = function (errorEvent) {
+        var insp_errorHandler = exports.insp_errorHandler = function (errorEvent) {
             var args = [
                 errorEvent.message + '    %c' + errorEvent.filename + ':' + errorEvent.lineno, 
                 'color:gray;'

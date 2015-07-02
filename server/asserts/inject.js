@@ -1,43 +1,12 @@
-;function _execute () {
-    console.log(eval.apply(this, arguments))
-}
 ;(function () {
+    'use strict';
+
     var slice = Array.prototype.slice
-    var toString = Object.prototype.toString
     var clientId = '<%= clientId %>'
     var _requestHandlers = {}
-    var baseDocumentData
     var dataPacketQueue = []
+    var localBaseDocumentData
     var differ, socket
-
-    /* =================================================================== */
-    /**
-     *  Get all mathes rules form an element
-     **/
-    function getMatchesRules ($el) {
-        var styleSheets = slice.call(document.styleSheets),
-            matches = [];
-
-        if (styleSheets) {
-            styleSheets.forEach(function (item, index) {
-               if (item.cssRules) {
-                    var rules = slice.call(item.cssRules);
-                    rules.forEach(function (rule, rindex) {
-                        if ($el.matches(rule.selectorText)) {
-                            matches.push({
-                                styleSheet: index,
-                                rule: rindex,
-                                cssText: rule.cssText,
-                                selectorText: rule.selectorText,
-                                href: item.href || item.ownerNode.getAttribute('href')
-                            });
-                        } 
-                    });
-               }
-            });
-        }
-        return matches;
-    }
 
     /**
      *  Get document html
@@ -58,7 +27,7 @@
             item.src = '';
         });
         styleSheets.forEach(function (item) {
-            if (item.getAttribute('href') !== item.href && !item.['_jsi-href']) {
+            if (item.getAttribute('href') !== item.href && !item['_jsi-href']) {
                 item['_jsi-href'] = item.href
             }
         });
@@ -71,7 +40,7 @@
             }
         });
         images.forEach(function (item) {
-            if (item.getAttribute('src') !== item.src && !item.['_jsi-src']) {
+            if (item.getAttribute('src') !== item.src && !item['_jsi-src']) {
                 item['_jsi-src'] = item.src
             }
         });
@@ -90,8 +59,8 @@
             });
         });
         // get document doctype
-        var node = document.doctype,
-            doctype = "<!DOCTYPE "
+        var node = document.doctype
+        var doctype = '<!DOCTYPE '
                         + node.name
                         + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
                         + (!node.publicId && node.systemId ? ' SYSTEM' : '') 
@@ -105,11 +74,14 @@
     /**
      *  use iframe for ajax CORS
      **/
-    var requestId = 0
+    var requestId = 1
     function $send (options, success, error) {
-        var id = requestId ++; 
-        options.id = id;
-        socket.emit('client:sync', options)
+        var id = requestId ++
+        socket.emit('client:' + options.type, {
+            pid: id, // packet id
+            cid: clientId,
+            data: options.data
+        })
         /**
          *  register postMessage callback
          **/
@@ -125,59 +97,62 @@
      **/
     document.addEventListener('connectionReady', function (e) {
         socket = e.socket
+        differ = jsondiffpatch.create({
+            textDiff: {
+                // default 60, minimum string length (left and right sides) 
+                // to use text diff algorythm: google-diff-match-patch
+                minLength: 256
+            }
+        });
         clientReady()
     });
 
     function clientReady () {
         /**
-         *  receive postMessage response 
+         *  receive server-side response 
          **/
-        socket.on('server:push', function (event) {
-            var handler,
-                data = event.data;
+        socket.on('server:answer:init:' + clientId, function (data) {
+            var handler = _requestHandlers[data.pid]
+            if (!handler) return
+            delete _requestHandlers[data.pid]
+            handler.success && handler.success(data.data)
+        });
+        socket.on('server:answer:update:' + clientId, function (data) {
+            var handler = _requestHandlers[data.pid]
+            if (!handler) return
 
-            if (handler = _requestHandlers[data.id]) {
-                if (data.xhr.status == 200) {
-                    handler.success &&　handler.success(data.data, data.xhr);
-                } else {
-                    handler.error && handler.error(data.error, data.xhr);                
-                }
-                delete handler[data.id];
-            }
+            delete _requestHandlers[data.pid]
+            handler.success && handler.success(data.data)
         });
         /* =================================================================== */
         /**
          *  initialize step
          **/
         function documentInitalize (done) {
-            var docHTML = getDocuemnt(),
-                uploadData = {
-                    ssid: SSID(),
-                    html: docHTML,
-                    meta: {
-                        scrollTop: document.body.scrollTop
-                    },
-                    clientId: clientId
-                };
-
-            documentUpload(uploadData, done);
+            var docHTML = getDocuemnt()
+            var uploadData = {
+                html: docHTML,
+                meta: {
+                    scrollTop: document.body.scrollTop
+                }
+            }
+            documentUpload(uploadData, done)
         }
 
-        function documentUpload (data, callback) {
-            initPost(data, function () {
-                baseDocumentData = data;
-                callback && callback();
+        function documentUpload (data, cb) {
+            initialSend(data, function () {
+                localBaseDocumentData = data;
+                cb && cb();
             }, function () {
-                documentUpload(data, callback);
+                // if fail, retry
+                documentUpload(data, cb);
             });
         }
 
-        function initPost (data, success, error) {
+        function initialSend (data, success, error) {
             $send({
-                method: 'POST',
-                url: '/html/init?<%= clientId %>',
-                type: 'text/plain',
-                data: JSON.stringify(data),
+                type: 'init',
+                data: data,
             }, success, error);
         }
         /* =================================================================== */
@@ -198,10 +173,10 @@
                 var dataPacket = genDetalData();
                 if (dataPacket) {
                     // update base document content
-                    baseDocumentData.html = dataPacket.html;
+                    localBaseDocumentData.html = dataPacket.html;
                     delete dataPacket.html;
                     // sync the meta
-                    baseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
+                    localBaseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
                     // TODO
                     sendToQueue(dataPacket);
                 }
@@ -210,8 +185,7 @@
                 var dataPacket = {
                     meta: {
                         scrollTop: document.body.scrollTop
-                    },
-                    clientId: clientId
+                    }
                 };
                 sendToQueue(dataPacket);
             });
@@ -222,10 +196,10 @@
                 var dataPacket = genDetalData();
                 if (dataPacket) {
                     // update base document content
-                    baseDocumentData.html = dataPacket.html;
+                    localBaseDocumentData.html = dataPacket.html;
                     delete dataPacket.html;
                     // sync the meta
-                    baseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
+                    localBaseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
                     // dirty checking callback
                     hasDirtyCallback(dataPacket);
                 }
@@ -241,8 +215,7 @@
                     dataPacket = {
                         meta: {
                             consoles: insp_consoles,
-                        },
-                        clientId: clientId
+                        }
                     }
                     insp_consoles = [];
                     hasConsoleCallback(dataPacket);
@@ -257,14 +230,13 @@
             var checkedDoc = getDocuemnt(),
                 dirtyDataPacket;
 
-            if (checkedDoc != baseDocumentData.html) {
+            if (checkedDoc !== localBaseDocumentData.html) {
                 dirtyDataPacket = {
                     html: checkedDoc,
-                    delta: differ.diff(baseDocumentData.html, checkedDoc),
+                    delta: differ.diff(localBaseDocumentData.html, checkedDoc),
                     meta: {
                         scrollTop: document.body.scrollTop
-                    },
-                    clientId: clientId
+                    }
                 }
                 // dirty checking callback
                 return dirtyDataPacket;
@@ -274,26 +246,15 @@
 
         function deltaPost (data, success, error) {
             $send({
-                method: 'POST',
-                url: '/html/delta?<%= clientId %>',
-                type: 'text/plain',
-                data: JSON.stringify(data),
+                type: 'update',
+                data: data
             }, success, error);
         }
 
         function sendToQueue (dataPacket) {
-            var ssid = SSID.get();
-            if (ssid) {
-                dataPacket.ssid = ssid;
-                dataPacketQueue.push(dataPacket);
-                // trigger a event to notify queue manager
-                onDataPacketPush();
-            } else {
-                dataPacketQueue = [];
-                documentInitalize(function () {
-                    // TODO
-                });
-            }
+            dataPacketQueue.push(dataPacket);
+            // trigger a event to notify queue manager
+            onDataPacketPush();
         }
 
         /* =================================================================== */
@@ -303,19 +264,16 @@
          *  queue
          **/
         function onDataPacketPush () {
-            if (queueProcessing) {
-                // task queue manager is working now, lock
-                return;
-            } else {
-                queueProcess();
-            }
+            // task queue manager is working now, lock
+            if (queueProcessing) return
+            queueProcess()
         }
 
-        var MAX_RETRY_TIMES = 5,
-            retryTimes = 0;
+        var MAX_RETRY_TIMES = 5
+        var retryTimes = 0
 
         function queueProcess () {
-            if (dataPacketQueue.length == 0) {
+            if (dataPacketQueue.length === 0) {
                 // stop when the queue is empty
                 queueProcessing = false;
                 return;
@@ -330,11 +288,11 @@
 
                 dataPacketQueue.shift();
                 // aync for the performance
-
-                var timer = window.Worker ? 0 : 100; 
+                // var timer = window.Worker ? 0 : 100;
+                var inter = 100
                 setTimeout( function() {
                     queueProcess();
-                }, timer);
+                }, inter);
                     
             }, function (err, xhr) {
 
@@ -356,81 +314,5 @@
             deltaCheckingStart();
         });
     }
-
-
-    /* =================================================================== */
-    /**
-     *  @https://github.com/LiosK/UUID.js/blob/master/src/uuid.core.js
-     **/
-    function UUID() {
-        var cacheUUID = localStorage.getItem('__js_inspector_uuid__');
-        if (cacheUUID) {
-            return cacheUUID;
-        } else {
-            cacheUUID = UUID.generate();
-            localStorage.setItem('__js_inspector_uuid__', cacheUUID);
-            return cacheUUID;
-        }
-    }
-
-    /**
-     * The simplest function to get an UUID string.
-     * @returns {string} A version 4 UUID string.
-     */
-    UUID.generate = function() {
-      var rand = UUID._gri, hex = UUID._ha;
-      return  hex(rand(32), 8)          // time_low
-            + "-"
-            + hex(rand(16), 4)          // time_mid
-            + "-"
-            + hex(0x4000 | rand(12), 4) // time_hi_and_version
-            + "-"
-            + hex(0x8000 | rand(14), 4) // clock_seq_hi_and_reserved clock_seq_low
-            + "-"
-            + hex(rand(48), 12);        // node
-    };
-
-    /**
-     * Returns an unsigned x-bit random integer.
-     * @param {int} x A positive integer ranging from 0 to 53, inclusive.
-     * @returns {int} An unsigned x-bit random integer (0 <= f(x) < 2^x).
-     */
-    UUID._gri = function(x) { // _getRandomInt
-      if (x <   0) return NaN;
-      if (x <= 30) return (0 | Math.random() * (1 <<      x));
-      if (x <= 53) return (0 | Math.random() * (1 <<     30))
-                        + (0 | Math.random() * (1 << x - 30)) * (1 << 30);
-      return NaN;
-    };
-
-    /**
-     * Converts an integer to a zero-filled hexadecimal string.
-     * @param {int} num
-     * @param {int} length
-     * @returns {string}
-     */
-    UUID._ha = function(num, length) {  // _hexAligner
-      var str = num.toString(16), i = length - str.length, z = "0";
-      for (; i > 0; i >>>= 1, z += z) { if (i & 1) { str = z + str; } }
-      return str;
-    };
-
-    /* =================================================================== */
-    /**
-     *  session id generator
-     **/
-    function SSID () {
-        var ssid = sessionStorage.getItem('__js_inspector_ssid__');
-        if (ssid) {
-            return ssid;
-        } else {
-            ssid = UUID.generate();
-            sessionStorage.setItem('__js_inspector_ssid__', ssid);
-            return ssid;
-        }
-    }
-    SSID.get = function () {
-        return sessionStorage.getItem('__js_inspector_ssid__');
-    };
     
 })();

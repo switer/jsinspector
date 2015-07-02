@@ -1,14 +1,26 @@
-!function () {
+;function _jsinpector_execute (code) {
+    'use strict';
+
     var script = document.createElement('script')
+    script.innerHTML = '!function(){' + code + '}()'
+    document.head.appendChild(script)
+    document.head.removeChild(script)
+};
+!function _jsinpector_socket() {
+    'use strict';
+
+    var script = document.createElement('script')
+    var clientId = '<%= clientId %>'
 
     script.src = '<%= host %>/socket.io/socket.io.js'
     script.onload = function () {
+
         var socket = io.connect('<%= host %>/client')
-        var readyEvent = new Event('connectionReady', {socket: socket})
-        
-        socket.on('client:inject:<%= clientId %>', function (payload) {
+        var readyEvent = new CustomEvent('connectionReady')
+
+        socket.on('client:inject:' + clientId, function (payload) {
             switch (payload.type) {
-                case 'eval': _execute(payload.value);
+                case 'eval': _jsinpector_execute(payload.value);
                     break;
                 case 'js': 
                     var s = document.createElement('script')
@@ -24,6 +36,7 @@
             }
         })
         window.addEventListener('load', function () {
+            readyEvent.socket = socket
             document.dispatchEvent(readyEvent)
         })
     }

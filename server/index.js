@@ -18,7 +18,7 @@ var jsondiffpatch = require('jsondiffpatch').create({
  */
 var app = new express()
 var server = http.createServer(app)
-var io = require('socket.io').listen(server)
+var io = require('socket.io').listen(server, { log: false })
 
 var tmpDir = './.tmp'
 !fs.existsSync(tmpDir) && fs.mkdirSync(tmpDir)
@@ -41,4 +41,82 @@ app.use(cookieParser())
 app.enable('etag')
 app.use(require('./routes/client'))
 
+io.set('log level', 5)
+
+var inspectorSocket = io.of('/inpsector')
+var clientSocket = io.of('/client')
+
+inspectorSocket.on('connection', function(socket) {
+    socket.on('inspector:input', function(data) {
+        clientSocket.emit('client:inject:' + data.id, data.payload)
+    })
+})
+
+clientSocket.on('connection', function(socket) {
+	socket.on('client:init', function (payload) {
+        var clientId = payload.cid
+        var packetId = payload.pid
+        var data = payload.data
+        var file = path.join(tmpDir, 'client_' + clientId + '.json')
+        // save as base document data
+        fs.writeFileSync(file, JSON.stringify(data), 'utf-8')
+        // tell inspector
+        inspectorSocket.emit('server:inspector:' + clientId, data)
+
+        socket.emit('server:answer:init:' + clientId, {
+            cid: clientId,
+            pid: packetId
+        })
+    })
+    socket.on('client:update', function (payload) {
+        var clientId = payload.cid
+        var packetId = payload.pid
+        var data = payload.data
+        var file = path.join(tmpDir, 'client_' + clientId + '.json')
+        var tmpData = fs.readFileSync(file, 'utf-8')
+
+        function fail () {
+            socket.emit('server:answer:init:' + clientId, {
+                cid: clientId,
+                pid: packetId,
+                error: { code: 4000, message: 'Base HTML not found!' }
+            })
+        }
+        if (tmpData) {
+            tmpData = JSON.parse(tmpData)
+
+            // patching html text
+            if (data.delta && !data.html && tmpData.html) {
+
+                // full amount release, currently I can't support delta release
+                data.html = jsondiffpatch.patch(tmpData.html, data.delta);
+                delete data.delta;
+
+            } else if (!data.html && tmpData.html) {
+                // match when receive the data packet only the meta
+                data.html = tmpData.html;
+            } else if (!data.html) {
+                return fail()
+            }
+
+            // save newest inspect data
+            fs.writeFileSync(file, JSON.stringify(data), 'utf-8')
+
+            // tell inspector
+            inspectorSocket.emit('server:inspector:' + clientId, data)
+            socket.emit('server:answer:update:' + clientId, {
+                cid: clientId,
+                pid: packetId
+            })
+
+        } else {
+            return fail()
+        }
+
+    })
+})
+
 module.exports = server
+
+
+

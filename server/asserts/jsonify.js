@@ -2,7 +2,7 @@
  *  Every object can be serialized to json
  **/
 !function (exports) {
-    'use strict;'
+    'use strict';
 
     var toString = Object.prototype.toString,
         slice = Array.prototype.slice,

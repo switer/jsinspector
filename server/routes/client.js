@@ -7,14 +7,15 @@ var ejs = require('ejs')
 var scripts = {}
 var uuid = require('node-uuid')
 
-;['inject', 'console', 'jsonify', 'socket', 'jsondiffpatch'].forEach(function(s) {
-    scripts[s] = fs.readFileSync(path.join(__dirname, '../asserts/', s + '.js'), 'utf-8')
-})
 
+var ENALE_MINIFY = false
 /**
  * Client inject script
  */
 router.get('/s', function(req, res) {
+    ;['inject', 'console', 'jsonify', 'socket', 'jsondiffpatch'].forEach(function(s) {
+        scripts[s] = fs.readFileSync(path.join(__dirname, '../asserts/', s + '.js'), 'utf-8')
+    })
     res.setHeader('Content-Type', 'application/javascript')
 
     var clientId = req.cookies['_jsinspector_client_id_']
@@ -29,15 +30,19 @@ router.get('/s', function(req, res) {
     }
     var inject = ejs.render(scripts.inject, clientParams)
     var socket = ejs.render(scripts.socket, clientParams)
-
-    res.send(uglify.minify(
-    	[scripts.jsonify, scripts.console, scripts.jsondiffpatch, socket,  inject].join('\n'), 
-    	{
-	        fromString: true,
-	        mangle: true,
-	        compress: true
-	    }
-	).code)
+    var sourceCode = [scripts.jsonify, scripts.console, scripts.jsondiffpatch, socket,  inject].join('\n')
+    if (ENALE_MINIFY) {
+        res.send(uglify.minify(
+            sourceCode, 
+        	{
+    	        fromString: true,
+    	        mangle: true,
+    	        compress: true
+    	    }
+    	).code)
+    } else {
+        res.send(sourceCode)
+    }
 })
 
 module.exports = router

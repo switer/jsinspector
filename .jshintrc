@@ -1,0 +1,24 @@
+{
+  "eqeqeq": false,
+  "browser": true,
+  "asi": true,
+  "multistr": true,
+  "undef": true,
+  "unused": true,
+  "trailing": true,
+  "sub": true,
+  "node": true,
+  "laxbreak": true,
+  "evil": true,
+  "eqnull": true,
+  "proto": true,
+  "expr": true,
+  "globals": {
+    "alert": true,
+    "console": true,
+    "jsonify": true,
+    "insp_consoles": true,
+    "io": true,
+    "_jsinpector_execute": true
+  }
+}
