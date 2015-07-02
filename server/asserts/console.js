@@ -7,11 +7,12 @@
     var slice = Array.prototype.slice;
 
     function NOOP () {}
-    function insp_log (type, args) {
+    function _log (type, args) {
         console['_'+type].apply(console, args)
     }
-    function insp_logHandler (type, args, noLocal) {
-        !noLocal && insp_log(type, args);
+
+    function _logProxy (type, args, noLocal) {
+        !noLocal && _log(type, args);
 
         args = slice.call(args);
         args.forEach(function (item, index) {
@@ -22,24 +23,25 @@
             }
         });
 
-        insp_consoles.push({
+        _jsinspector_consoles.push({
             type: type,
             args: JSON.stringify(args)
         });
     }
-    function logHandler (type) {
+    function _logHook (type) {
         return function () {
-            insp_logHandler(type, arguments);
+            _logProxy(type, arguments);
         }
     }
     
-    if (!exports.insp_console_inited) {
+    if (!exports._jsinspector_console_inited) {
 
         // mark as inited
-        exports.insp_console_inited = true;
-        exports.insp_consoles = [];
+        exports._jsinspector_console_inited = true;
+        exports._jsinspector_consoles = [];
 
         var proxyMethods = ['log', 'clear', 'error', 'info', 'warn', 'time', 'timeEnd']
+
         /**
          *  Saving native methods
          **/
@@ -51,23 +53,23 @@
          *  console methods override  
          **/
         proxyMethods.forEach(function (m) {
-            console[m] = logHandler(m)
+            console[m] = _logHook(m)
         })
         
-        var insp_times = {};
+        var _times = {};
         console.time = function (name) {
-            insp_times[name] = Date.now();
+            _times[name] = Date.now();
         }
         console.timeEnd = function (name) {
-            if (insp_times[name] === undefined) return;
-            var end = Date.now() - insp_times[name];
-            insp_logHandler('log', ['%c' + name + ': ' + end + 'ms', 'color: blue'])
+            if (_times[name] === undefined) return;
+            var end = Date.now() - _times[name];
+            _logProxy('log', ['%c' + name + ': ' + end + 'ms', 'color: blue'])
         }
-        // init clear console
-        console.clear();
 
-        /* =================================================================== */
-        var insp_errorHandler = exports.insp_errorHandler = function (errorEvent) {
+        /**
+         * Catch global error
+         */
+        function _errorProxy(errorEvent) {
             var args = [
                 errorEvent.message + '    %c' + errorEvent.filename + ':' + errorEvent.lineno, 
                 'color:gray;'
@@ -75,9 +77,12 @@
             if (errorEvent.error && errorEvent.error.stack) {
                 args.push(errorEvent.error.stack);
             }
-            insp_logHandler('error', args, true);
-        };
-        window.addEventListener('error', insp_errorHandler);
+            _logProxy('error', args, true);
+        }
+        window.addEventListener('error', _errorProxy)
+
+        // init clear console
+        console.clear();
     }
 
 }(this);

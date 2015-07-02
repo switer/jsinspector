@@ -1,3 +1,7 @@
+/**
+ * Entry of client script
+ * @return {[type]} [description]
+ */
 ;(function () {
     'use strict';
 
@@ -211,17 +215,19 @@
         function consoleChecking (hasConsoleCallback) {
             setTimeout(function() {
                 var dataPacket;
-                if (insp_consoles.length > 0) {
+                var consoles = window._jsinspector_consoles
+
+                if (consoles.length > 0) {
                     dataPacket = {
                         meta: {
-                            consoles: insp_consoles,
+                            consoles: consoles,
                         }
                     }
-                    insp_consoles = [];
-                    hasConsoleCallback(dataPacket);
+                    window._jsinspector_consoles = []
+                    hasConsoleCallback(dataPacket)
                 }
-                consoleChecking(hasConsoleCallback);
-            }, 100);
+                consoleChecking(hasConsoleCallback)
+            }, 100)
         }
         /**
          *  Generate delata data when has dirty data, else if return null
