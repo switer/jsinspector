@@ -12,6 +12,7 @@ var jsondiffpatch = require('jsondiffpatch').create({
         minLength: 256
     }
 })
+var config = require('../config.json')
 /**
  * JSInspector server and socket server
  * @type {express}
@@ -20,7 +21,7 @@ var app = new express()
 var server = http.createServer(app)
 var io = require('socket.io').listen(server, { log: false })
 
-var tmpDir = './.tmp'
+var tmpDir = config.tmp_dir
 !fs.existsSync(tmpDir) && fs.mkdirSync(tmpDir)
 
 /**
@@ -39,7 +40,13 @@ app.use(function(req, res, next) {
 })
 app.use(cookieParser())
 app.enable('etag')
+app.use(require('./routes/inspector'))
 app.use(require('./routes/client'))
+
+var clients = {}
+app.get('/clients', function (req, res, next) {
+    res.send(clients)
+})
 
 io.set('log level', 5)
 
@@ -53,11 +60,16 @@ inspectorSocket.on('connection', function(socket) {
 })
 
 clientSocket.on('connection', function(socket) {
+
 	socket.on('client:init', function (payload) {
         var clientId = payload.cid
         var packetId = payload.pid
         var data = payload.data
         var file = path.join(tmpDir, 'client_' + clientId + '.json')
+
+        // connect session
+        clients[clientId] = data.browser
+
         // save as base document data
         fs.writeFileSync(file, JSON.stringify(data), 'utf-8')
         // tell inspector
@@ -68,6 +80,7 @@ clientSocket.on('connection', function(socket) {
             pid: packetId
         })
     })
+    
     socket.on('client:update', function (payload) {
         var clientId = payload.cid
         var packetId = payload.pid

@@ -19,20 +19,25 @@
 
         var doc = document.documentElement
         var scripts = slice.call(doc.querySelectorAll('script'))
-        var styleSheets = slice.call(doc.querySelectorAll('link'))
+        var links = slice.call(doc.querySelectorAll('link'))
         var styles = slice.call(doc.querySelectorAll('style'))
         var images = slice.call(doc.querySelectorAll('img'))
         var inputs = slice.call(doc.querySelectorAll('input,textarea'))
         var selects = slice.call(doc.querySelectorAll('select'))
-
+        
         scripts.forEach(function (item) {
             item.innerHTML = '';
             item.setAttribute('_src', item.src);
             item.src = '';
         });
-        styleSheets.forEach(function (item) {
-            if (item.getAttribute('href') !== item.href && !item['_jsi-href']) {
-                item['_jsi-href'] = item.href
+        links.forEach(function (item) {
+            if (item.getAttribute('href') !== item.href && !item.getAttribute('jsi-href')) {
+                item.setAttribute('jsi-href', item.href)
+            }
+        });
+        images.forEach(function (item) {
+            if (item.getAttribute('src') !== item.src && !item.getAttribute('jsi-src')) {
+                item.setAttribute('jsi-src', item.src)
             }
         });
         styles.forEach(function (item) {
@@ -41,11 +46,6 @@
                     /url\(([\'\"])*[\/]*(?!http:\/\/|data:|https:\/\/)/g, 
                     'url($1' + window.location.protocol + '//' + window.location.host + '/'
                 );
-            }
-        });
-        images.forEach(function (item) {
-            if (item.getAttribute('src') !== item.src && !item['_jsi-src']) {
-                item['_jsi-src'] = item.src
             }
         });
         inputs.forEach(function (item) {
@@ -97,7 +97,7 @@
 
     /* =================================================================== */
     /**
-     *  replace cross-domain's stylesheets
+     *  replace cross-domain's links
      **/
     document.addEventListener('connectionReady', function (e) {
         socket = e.socket
@@ -128,13 +128,19 @@
             delete _requestHandlers[data.pid]
             handler.success && handler.success(data.data)
         });
-        /* =================================================================== */
+
         /**
          *  initialize step
          **/
         function documentInitalize (done) {
             var docHTML = getDocuemnt()
             var uploadData = {
+                browser: {
+                    clientId: clientId,
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform
+                },
                 html: docHTML,
                 meta: {
                     scrollTop: document.body.scrollTop
@@ -227,7 +233,7 @@
                     hasConsoleCallback(dataPacket)
                 }
                 consoleChecking(hasConsoleCallback)
-            }, 100)
+            }, 50)
         }
         /**
          *  Generate delata data when has dirty data, else if return null

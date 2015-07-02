@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>JSInspector - Clients</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="zect.min.js"></script>
+    <style>
+        body {margin: 0;}
+        ul {display: block;list-style: none;padding: 0;margin: 10px 0;}
+        ul li {line-height: 36px;display: -webkit-box;padding: 5px 10px;}
+        ul li .icon {background: url(./images/phone.png) center center no-repeat;height: 36px;width: 36px;
+        	background-size: 36px auto;display: block;margin-right: 10px;}
+        ul li a {overflow: hidden;text-overflow: ellipsis;display: block;width: 50%;white-space: nowrap;-webkit-box-flex:1;}
+    </style>
+</head>
+<body>
+	<div id="app">
+		<ul>
+		<r-repeat items="{clients}">
+			<li>
+				<i class="icon"></i>
+				<a href="{'/inspector.html?cid=' + clientInfos[$value].clientId}" target="blank">{clientInfos[$value].userAgent}</a>
+			</li>
+		</r-repeat>
+		</ul>	
+	</div>
+	<script>
+		function $get (options, success, error) {
+	        var xhr = new XMLHttpRequest();
+	        xhr.onreadystatechange = function () {
+	            if (xhr.readyState == 4 && xhr.status == 200 && xhr.responseText) {
+	                success && success(xhr.responseText, xhr);
+	            } else if (xhr.readyState == 4 && xhr.status != 200) {
+	                error && error(xhr.response, xhr);
+	            }
+	        }
+	        xhr.open('GET', options.url);
+	        xhr.send(null);
+	    }
+
+		Zect.namespace('r')
+		new Zect({
+			el: '#app',
+			data: function () {
+				return {
+					clients: [],
+					clientInfos: {}
+				}
+			},
+			ready: function () {
+				$get({
+					url: '/clients'
+				}, function (data) {
+					data = JSON.parse(data)
+					this.$data.clientInfos = data
+					this.$data.clients = Object.keys(data)
+				}.bind(this))
+			}
+		})
+	</script>
+</body>
+</html>

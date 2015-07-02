@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JSInspector devtools</title>
+    <script src="reverse.js"></script>
+    <style>
+        body {margin: 0;display: block;height: auto;width: 100%;overflow:auto;-webkit-overflow-scrolling:touch;}
+        #inspectedWindow {display: block;width: 100%;}
+    </style>
+</head>
+<body>
+    <!-- inpsctor inspected device view frame -->
+    <iframe src="about:blank" frameborder="0" id="inspectedWindow" ></iframe>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="inspector.js"></script>
+</body>
+</html>
