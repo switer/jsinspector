@@ -40,6 +40,9 @@
         scripts.forEach(function (item) {
             if (!item.__jsinspecotr_fixed_url) {
                 item.__jsinspecotr_fixed_url = 1
+                if (item.getAttribute('src')) {
+                    item.setAttribute('src', fillURL(item.src))
+                }
                 item.setAttribute('jsi-script', '')
             }
         });
@@ -96,7 +99,7 @@
                         var l = m.match(/^<script\s[^\>]*?>/)[0]
 
                         if (!/\sjsi-script=/.test(l)) return m
-                        else if (/\stype="/.test(l) && !/\stype="application\/javascript"/.test(l)) return m
+                        else if (/\stype="/.test(l) && !/\stype\s/.test(l) && !/\stype="application\/javascript"/.test(l)) return m
                         else if (!/\ssrc\b/.test(l)) return m.replace(/^<script/, '<script src=""')
                         else return m.replace(/\bsrc=/, 'src="" _src=')
                     })

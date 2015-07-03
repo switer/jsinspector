@@ -31,7 +31,11 @@ var tmpDir = config.tmp_dir
 app.use(compress())
 
 app.get('/*.js', function (req, res, next) {
-    var sourceCode = fs.readFileSync(path.join(__dirname, '../public', '.' + req.path), 'utf-8')
+    var fpath = path.join(__dirname, '../public', '.' + req.path)
+    if (!fs.existsSync(fpath)) return res.status(404).send(req.path + ' not found !')
+
+    var sourceCode = fs.readFileSync(fpath, 'utf-8')
+
     if (req.path == '/inspector.js') sourceCode = ejs.render(sourceCode, {
         serverTime: +new Date
     })

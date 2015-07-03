@@ -106,12 +106,6 @@
                 document.head.appendChild(item.cloneNode(true));
             });
         }
-
-        // var jsiSrcs = Array.prototype.slice.call(ispDoc.querySelectorAll('[jsi-src]'));
-        // jsiSrcs.forEach(function (item) {
-        //     item.setAttribute('src', item.getAttribute('jsi-src'));
-        //     item.removeAttribute('jsi-src');
-        // })
     }
     /**
      *  Get init document content from jsinpsctor server as base document for delta download
@@ -144,7 +138,7 @@
 
             // receive document by websocket
             socket.on('server:inspector:' + cliendId, function (data) {
-                data.time && console.log('Delay Time:', (new Date - clientTime + serverTime) - data.time)
+                // data.time && console.log('Delay Time:', (new Date - clientTime + serverTime) - data.time)
                 updateinspectedWindow(data);
             });
 
