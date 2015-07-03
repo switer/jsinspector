@@ -11,35 +11,47 @@
     var localBaseDocumentData
     var serverTime = <%= serverTime %>
     var clientTime = +new Date
-    var differ, socket
+    var differ, socket, anchor
 
+    function fillURL(url) {
+        if (!anchor) anchor = document.createElement('a')
+        anchor.href = url
+        return anchor.origin + anchor.pathname + anchor.search
+    }
     /**
      *  Get document html
      **/
+    var lastOuterHTML
     function getDocument () {
 
         var doc = document.documentElement
-        var scripts = slice.call(doc.querySelectorAll('script'))
-        var links = slice.call(doc.querySelectorAll('link'))
+
+        if (lastOuterHTML === doc.outerHTML) return null
+
+        var scripts = slice.call(document.scripts)
+        var links = slice.call(doc.querySelectorAll('link[rel="stylesheet"]'))
         var styles = slice.call(doc.querySelectorAll('style'))
         var images = slice.call(doc.querySelectorAll('img'))
         var inputs = slice.call(doc.querySelectorAll('input,textarea'))
         var selects = slice.call(doc.querySelectorAll('select'))
         
+
+        // avoid regexp match uncorrectly
         scripts.forEach(function (item) {
-            item.innerHTML = '';
-            item.setAttribute('_src', item.src);
-            item.src = '';
+            if (!item.__jsinspecotr_fixed_url) {
+                item.__jsinspecotr_fixed_url = 1
+                item.setAttribute('jsi-script', '')
+            }
         });
         links.forEach(function (item) {
-            if (item.getAttribute('href') !== item.href && !item.getAttribute('jsi-href')) {
-                item.setAttribute('jsi-href', item.href)
-            }
+            if (item.__jsinspecotr_fixed_url) return
+            item.__jsinspecotr_fixed_url = true
+            item.setAttribute('href', fillURL(item.href))
         });
         images.forEach(function (item) {
-            if (item.getAttribute('src') !== item.src && !item.getAttribute('jsi-src')) {
-                item.setAttribute('jsi-src', item.src)
-            }
+            if (item.__jsinspecotr_fixed_url) return
+            item.__jsinspecotr_fixed_url = true
+            item.setAttribute('src', fillURL(item.src))
         });
         styles.forEach(function (item) {
             if (item.innerHTML) {
@@ -72,7 +84,23 @@
                         + (node.systemId ? ' "' + node.systemId + '"' : '')
                         + '>';
 
-        return doctype + doc.innerHTML
+        var content = lastOuterHTML = doc.outerHTML
+        content = content
+                    // .replace(/<link\s[^\>]*?href="([^\"]+)"[^\>]*?\/?>/g, function (m, u) {
+                    //     if (/\bjsi-link/.test(m)) {
+                    //         var l = m.replace(/\bhref="[^\"]+"/, 'href="' + fillURL(u) + '"')
+                    //         return l
+                    //     } else return m
+                    // })
+                    .replace(/<script\s[^\>]*?>[\s\S]*?<\/script>/g, function (m) {
+                        var l = m.match(/^<script\s[^\>]*?>/)[0]
+
+                        if (!/\sjsi-script=/.test(l)) return m
+                        else if (/\stype="/.test(l) && !/\stype="application\/javascript"/.test(l)) return m
+                        else if (!/\ssrc\b/.test(l)) return m.replace(/^<script/, '<script src=""')
+                        else return m.replace(/\bsrc=/, 'src="" _src=')
+                    })
+        return doctype + content
     }
 
     /* =================================================================== */
