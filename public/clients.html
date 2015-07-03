@@ -5,6 +5,7 @@
 	<title>JSInspector - Clients</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="zect.min.js"></script>
+    <script src="detect.js"></script>
     <style>
         body {margin: 0;}
         ul {display: block;list-style: none;padding: 0;margin: 10px 0;}
@@ -20,7 +21,9 @@
 		<r-repeat items="{clients}">
 			<li>
 				<i class="icon"></i>
-				<a href="{'/inspector.html?cid=' + clientInfos[$value].clientId}" target="blank">{clientInfos[$value].userAgent}</a>
+				<a href="{'/inspector.html?cid=' + $value.cid}" target="blank">
+					{$value.info.os.family + '/' + $value.info.device.family + '/' + $value.info.browser.family + ' ' + $value.info.browser.version}
+				</a>
 			</li>
 		</r-repeat>
 		</ul>	
@@ -49,13 +52,23 @@
 				}
 			},
 			ready: function () {
+				var vm = this
 				$get({
 					url: '/clients'
 				}, function (data) {
 					data = JSON.parse(data)
-					this.$data.clientInfos = data
-					this.$data.clients = Object.keys(data)
-				}.bind(this))
+					vm.$data.clientInfos = data
+					vm.$data.clients = Object.keys(data).map(function (k) {
+						var item = data[k]
+						return {
+							cid: item.clientId,
+							ua: item.userAgent,
+							info: detect.parse(item.userAgent)
+						}
+					})
+				})
+			},
+			methods: {
 			}
 		})
 	</script>

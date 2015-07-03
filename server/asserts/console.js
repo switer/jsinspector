@@ -65,11 +65,10 @@
             var end = Date.now() - _times[name];
             _logProxy('log', ['%c' + name + ': ' + end + 'ms', 'color: blue'])
         }
-
         /**
          * Catch global error
          */
-        function _errorProxy(errorEvent) {
+        var _errorProxy = function(errorEvent) {
             var args = [
                 errorEvent.message + '    %c' + errorEvent.filename + ':' + errorEvent.lineno, 
                 'color:gray;'

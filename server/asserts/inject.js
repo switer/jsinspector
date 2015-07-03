@@ -4,7 +4,6 @@
  */
 ;(function () {
     'use strict';
-
     var slice = Array.prototype.slice
     var clientId = '<%= clientId %>'
     var _requestHandlers = {}
