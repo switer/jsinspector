@@ -6,9 +6,9 @@ var uglify = require('uglify-js')
 var ejs = require('ejs')
 var scripts = {}
 var uuid = require('node-uuid')
+var config = require('../../config')
+var ENABLE_MINI = config.enable_mini
 
-
-var ENALE_MINIFY = false
 /**
  * Client inject script
  */
@@ -31,7 +31,7 @@ router.get('/s', function(req, res) {
     var inject = ejs.render(scripts.inject, clientParams)
     var socket = ejs.render(scripts.socket, clientParams)
     var sourceCode = [scripts.jsonify, scripts.console, scripts.jsondiffpatch, socket,  inject].join('\n')
-    if (ENALE_MINIFY) {
+    if (ENABLE_MINI) {
         res.send(uglify.minify(
             sourceCode, 
         	{

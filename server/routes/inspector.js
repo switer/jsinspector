@@ -2,7 +2,7 @@ var express = require('express')
 var router = express.Router()
 var fs = require('fs')
 var path = require('path')
-var config = require('../../config.json')
+var config = require('../../config')
 
 /**
  * Client inject script

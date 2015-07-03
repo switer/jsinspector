@@ -4,6 +4,7 @@ var url = require('url')
 var http = require('http')
 var path = require('path')
 var express = require('express')
+var uglify = require('uglify-js')
 var compress = require('compression')
 var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser')
@@ -12,7 +13,7 @@ var jsondiffpatch = require('jsondiffpatch').create({
         minLength: 256
     }
 })
-var config = require('../config.json')
+var config = require('../config')
 /**
  * JSInspector server and socket server
  * @type {express}
@@ -28,6 +29,23 @@ var tmpDir = config.tmp_dir
  * Enalbe gzip
  */
 app.use(compress())
+
+app.get('/*.js', function (req, res, next) {
+    var sourceCode = fs.readFileSync(path.join(__dirname, '../public', req.path), 'utf-8')
+    if (config.enable_mini) {
+        res.send(uglify.minify(
+            sourceCode, 
+            {
+                fromString: true,
+                mangle: true,
+                compress: true
+            }
+        ).code)
+    } else {
+        res.send(sourceCode)
+    }
+})
+
 app.use(express.static(path.join(__dirname, '../public')))
 
 /**
