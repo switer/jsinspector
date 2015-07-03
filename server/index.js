@@ -8,7 +8,7 @@ var compress = require('compression')
 var bodyParser = require('body-parser')
 var rawBody = require('./middleware/rawbody')
 var clientIdParser = require('./middleware/clientid-parser')
-var clientDir = '../public/client/'
+var clientDir = path.join(__dirname, '../public/client/')
 var app = new express()
 var server = http.createServer(app)
 var io = require('socket.io').listen(server)
@@ -32,11 +32,12 @@ function readFile(path) {
     }
 }
 
+var tmpDir = path.join(__dirname, '../tmp')
 /**
  *  initialize
  **/
-if (!fs.existsSync('./tmp')) {
-    fs.mkdirSync('./tmp');
+if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir);
 }
 app.use(compress());
 /**
@@ -114,7 +115,7 @@ app.post('/html/init', clientIdParser, rawBody, function(req, res) {
     /**
      *  save
      **/
-    fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', content, 'utf-8');
+    fs.writeFileSync(path.join(tmpDir, 'inspector_html_' + req.inspectorId + '.json'), content, 'utf-8');
     io.sockets.emit('inspected:html:update:' + req.inspectorId, content);
     res.status(200).send('ok');
 });
@@ -137,7 +138,7 @@ app.post('/html/delta', clientIdParser, rawBody, function(req, res) {
      *  @delta {TextDelta}
      *  @meta {Object}
      **/
-    lastTmpData = fs.readFileSync('tmp/inspector_html_' + req.inspectorId + '.json', 'utf-8');
+    lastTmpData = fs.readFileSync(path.join(tmpDir, 'inspector_html_' + req.inspectorId + '.json'), 'utf-8');
     lastTmpData = JSON.parse(lastTmpData);
     syncData = JSON.parse(content);
 
@@ -177,8 +178,8 @@ app.get('/devtools', clientIdParser, function(req, res, next) {
         res.redirect('/');
         return;
     }
-    var html = fs.readFileSync('./public/devtools/devtools.html', 'utf-8'),
-        script = fs.readFileSync('./public/devtools/devtools.js', 'utf-8'),
+    var html = fs.readFileSync(path.join(__dirname, '../public/devtools/devtools.html'), 'utf-8'),
+        script = fs.readFileSync(path.join(__dirname, '../public/devtools/devtools.js'), 'utf-8'),
         host = req.headers.host;
 
     script = ejs.render(script, {
@@ -190,7 +191,7 @@ app.get('/devtools', clientIdParser, function(req, res, next) {
     }));
 });
 app.get('/devtools/init', clientIdParser, function(req, res) {
-    var file = readFile('tmp/inspector_html_' + req.inspectorId + '.json');
+    var file = readFile(path.join(tmpDir, 'inspector_html_' + req.inspectorId + '.json') );
     if (file) {
         res.send(file);
     } else {
