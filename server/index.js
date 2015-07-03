@@ -31,7 +31,10 @@ var tmpDir = config.tmp_dir
 app.use(compress())
 
 app.get('/*.js', function (req, res, next) {
-    var sourceCode = fs.readFileSync(path.join(__dirname, '../public', req.path), 'utf-8')
+    var sourceCode = fs.readFileSync(path.join(__dirname, '../public', '.' + req.path), 'utf-8')
+    if (req.path == '/inspector.js') sourceCode = ejs.render(sourceCode, {
+        serverTime: +new Date
+    })
     if (config.enable_mini) {
         res.send(uglify.minify(
             sourceCode, 
@@ -104,7 +107,9 @@ clientSocket.on('connection', function(socket) {
         var packetId = payload.pid
         var data = payload.data
         var file = path.join(tmpDir, 'client_' + clientId + '.json')
+        // syncData is used to tell inspector what is happening of client
         var tmpData = fs.readFileSync(file, 'utf-8')
+        var syncData
 
         function fail () {
             socket.emit('server:answer:init:' + clientId, {
@@ -113,14 +118,15 @@ clientSocket.on('connection', function(socket) {
                 error: { code: 4000, message: 'Base HTML not found!' }
             })
         }
+        syncData = JSON.parse(JSON.stringify(data))
+
         if (tmpData) {
             tmpData = JSON.parse(tmpData)
-
             // patching html text
             if (data.delta && !data.html && tmpData.html) {
 
                 // full amount release, currently I can't support delta release
-                data.html = jsondiffpatch.patch(tmpData.html, data.delta);
+                syncData.html = data.html = jsondiffpatch.patch(tmpData.html, data.delta);
                 delete data.delta;
 
             } else if (!data.html && tmpData.html) {
@@ -134,7 +140,7 @@ clientSocket.on('connection', function(socket) {
             fs.writeFileSync(file, JSON.stringify(data), 'utf-8')
 
             // tell inspector
-            inspectorSocket.emit('server:inspector:' + clientId, data)
+            inspectorSocket.emit('server:inspector:' + clientId, syncData)
             socket.emit('server:answer:update:' + clientId, {
                 cid: clientId,
                 pid: packetId

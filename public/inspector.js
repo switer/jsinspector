@@ -22,6 +22,8 @@
     var cliendId = queryParse().cid
     var inspectedWindow = document.querySelector('#inspectedWindow')
     var documentBase = ''
+    var serverTime = <%= serverTime %>
+    var clientTime = + new Date
 
     function queryParse() {
         var search = location.search
@@ -147,6 +149,7 @@
 
             // receive document by websocket
             socket.on('server:inspector:' + cliendId, function (data) {
+                data.time && console.log('Delay Time:', (new Date - clientTime + serverTime) - data.time)
                 updateinspectedWindow(data);
             });
 

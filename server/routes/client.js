@@ -26,7 +26,9 @@ router.get('/s', function(req, res) {
 
     var clientParams = {
         clientId: clientId,
-        host: 'http://' + req.headers.host
+        serverTime: +new Date,
+        host: 'http://' + req.headers.host,
+        delta: req.query.hasOwnProperty('delta') && req.query.delta != 'false'
     }
     var inject = ejs.render(scripts.inject, clientParams)
     var socket = ejs.render(scripts.socket, clientParams)

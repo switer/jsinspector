@@ -9,12 +9,14 @@
     var _requestHandlers = {}
     var dataPacketQueue = []
     var localBaseDocumentData
+    var serverTime = <%= serverTime %>
+    var clientTime = +new Date
     var differ, socket
 
     /**
      *  Get document html
      **/
-    function getDocuemnt () {
+    function getDocument () {
 
         var doc = document.documentElement
         var scripts = slice.call(doc.querySelectorAll('script'))
@@ -123,7 +125,6 @@
         socket.on('server:answer:update:' + clientId, function (data) {
             var handler = _requestHandlers[data.pid]
             if (!handler) return
-
             delete _requestHandlers[data.pid]
             handler.success && handler.success(data.data)
         });
@@ -132,7 +133,7 @@
          *  initialize step
          **/
         function documentInitalize (done) {
-            var docHTML = getDocuemnt()
+            var docHTML = getDocument()
             var uploadData = {
                 browser: {
                     clientId: clientId,
@@ -183,7 +184,8 @@
                 if (dataPacket) {
                     // update base document content
                     localBaseDocumentData.html = dataPacket.html;
-                    delete dataPacket.html;
+                    // if delta exist, use it
+                    if (dataPacket.delta) delete dataPacket.html;
                     // sync the meta
                     localBaseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
                     // TODO
@@ -206,7 +208,7 @@
                 if (dataPacket) {
                     // update base document content
                     localBaseDocumentData.html = dataPacket.html;
-                    delete dataPacket.html;
+                    if (dataPacket.delta) delete dataPacket.html;
                     // sync the meta
                     localBaseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
                     // dirty checking callback
@@ -214,7 +216,7 @@
                 }
                 // polling
                 dirtyChecking(hasDirtyCallback);
-            }, 300);
+            }, 200);
         }
 
         function consoleChecking (hasConsoleCallback) {
@@ -232,19 +234,20 @@
                     hasConsoleCallback(dataPacket)
                 }
                 consoleChecking(hasConsoleCallback)
-            }, 50)
+            }, 10)
         }
         /**
-         *  Generate delata data when has dirty data, else if return null
+         *  Generate delta data when has dirty data, else if return null
          **/
         function genDetalData () {
-            var checkedDoc = getDocuemnt(),
+            var checkedDoc = getDocument(),
                 dirtyDataPacket;
 
             if (checkedDoc !== localBaseDocumentData.html) {
                 dirtyDataPacket = {
                     html: checkedDoc,
-                    delta: differ.diff(localBaseDocumentData.html, checkedDoc),
+                    time: new Date - (clientTime - serverTime),
+                    delta: <%= delta %> ? differ.diff(localBaseDocumentData.html, checkedDoc) : null,
                     meta: {
                         scrollTop: document.body.scrollTop
                     }
@@ -252,6 +255,7 @@
                 // dirty checking callback
                 return dirtyDataPacket;
             }
+
             return null;
         }
 
@@ -299,17 +303,13 @@
 
                 dataPacketQueue.shift();
                 // aync for the performance
-                // var timer = window.Worker ? 0 : 100;
-                var inter = 100
                 setTimeout( function() {
                     queueProcess();
-                }, inter);
+                }, 50);
                     
-            }, function (err, xhr) {
+            }, function (err) {
 
-                if (xhr.status == 400) { // session is out of date
-                    // alert(err);
-                } else if (retryTimes >= MAX_RETRY_TIMES) { // max retry times
+                if (retryTimes >= MAX_RETRY_TIMES) { // max retry times
                     alert(err || 'network error!');
                 } else { // retry
                     retryTimes ++;
