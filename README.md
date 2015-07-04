@@ -9,16 +9,18 @@
 For [node](http://nodejs.org) via [npm](http://npmjs.org):
 ```bash
 npm install jsinspector -g
+```
 
+```bash
 jsinspector server
 ```
-JSInspector server's port default is 9000, open `Dashboard` page in browser:
+
+JSInspector server's **port** default to 9000, open `Dashboard` page in browser:
 ```url
 http://localhost:9000
 ```
+> Note: use `jsinspector server --port PROT` to listen specified port.
 
-## Usage
-Open **device** device dashboard, 
 
 ## More Features
 
