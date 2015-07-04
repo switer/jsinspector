@@ -1,0 +1,99 @@
+.iPhone {
+    background: #fff;
+    border: solid 2px #c5c5c5;
+    height: 500px;
+    width: 280px;
+    border-radius: 30px;
+    position: relative;
+    margin: 0 auto;
+    box-shadow: 0 5px 8px 0 rgba(50, 50, 50, 0.25);
+    -webkit-box-shadow: 0 5px 8px 0 rgba(50, 50, 50, 0.25);
+    -webkit-transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+    -moz-transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+    transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+}
+
+.iPhoneInner {
+    background: #fff;
+    border: solid 2px #b4b4b4;
+    height: 496px;
+    width: 276px;
+    border-radius: 30px;
+    position: relative;
+    margin: 0 auto;
+    box-shadow: 0 3px 5px 0 rgba(50, 50, 50, 0.75);
+    -webkit-transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+    -moz-transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+    transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+}
+
+.iPhoneInner .circButton {
+    background: #fff;
+    border: solid 2px #3b3b3b;
+    width: 36px;
+    height: 36px;
+    position: relative;
+    margin: 0 auto;
+    border-radius: 50%;
+    top: 48px;
+    cursor: pointer;
+    -webkit-box-shadow: inset 0 0px 3px rgba(0, 0, 0, .8);
+    box-shadow: inset 0 0px 3px rgba(0, 0, 0, .8);
+}
+
+.iPhoneInner .smallTopCirc {
+    background-color: #1f1f1f;
+    background-image: -webkit-linear-gradient(#1f1f1f, #141414);
+    background-image: linear-gradient(#1f1f1f, #141414);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    top: 6px;
+    position: relative;
+    margin: 0 auto;
+}
+
+.iPhoneInner .oval {
+    background-color: #1f1f1f;
+    background-image: -webkit-linear-gradient(#1f1f1f, #141414);
+    background-image: linear-gradient(#1f1f1f, #141414);
+    width: 50px;
+    height: 4px;
+    top: 14px;
+    border-radius: 2px;
+    margin: 0 auto;
+    margin-bottom: -12px;
+    position: relative;
+}
+
+.iScreen {
+    position: relative;
+    width: 250px;
+    height: 400px;
+    margin: 0 auto;
+    top: 40px;
+    overflow: hidden;
+    background-color: #1f1f1f;
+    background-image: -webkit-linear-gradient(#1f1f1f, #141414);
+    background-image: linear-gradient(#1f1f1f, #141414);
+    border: solid 2px #3b3b3b;
+    -webkit-transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+    -moz-transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+    transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+}
+
+.rotate {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+
+.rotateBack {
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}

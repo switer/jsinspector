@@ -42,39 +42,42 @@
         }
         return queries;
     }
-
-    function updateFrameHeight () {
-        if (isMobile) {
-            inspectedWindow.scrolling = 'no';
-            inspectedWindow.style.height = inspectedWindow.contentDocument.body.scrollHeight + 'px';
-        } else {
-            inspectedWindow.scrolling = 'yes';
-            inspectedWindow.style.position = 'absolute';
-            inspectedWindow.style.height = '100%';
-        }
-    }
     /**
      *  update inspected device view
      **/
-    function updateinspectedWindow (data) {
+    function $update (data) {
+        if (data.browser && data.browser.clientWidth) {
+            // inspectedWindow.style.width = data.browser.clientWidth + 'px'
+            inspectedWindow.style.width = '320px'
+        }
 
-        var ispDoc = inspectedWindow.contentDocument,
-            ispWin = inspectedWindow.contentWindow;
+        var ispDoc = inspectedWindow.contentDocument
+        var ispWin = inspectedWindow.contentWindow
+        var needReload = !!data.html
 
-        if (data.html) { // full amount download
+        if (needReload) { // full amount download
             documentBase = data.html;
             writeDocument(ispDoc, ispWin, documentBase);
         }
 
-        updateFrameHeight();
         if (data.meta.scrollTop !== undefined) {
             // update some metas only
-            if (isMobile) {
-                window.scrollTo(0, data.meta.scrollTop);
-            } else {
-                ispWin.scrollTo(0, data.meta.scrollTop)
-            }
+            ispWin.scrollTo(0, data.meta.scrollTop)
         }
+
+        // element partial scrolling
+        ;(data.meta.scrollElements || []).forEach(function (item) {
+            var el = ispDoc.querySelector(item.xpath)
+            if (!el) return
+            if (needReload) {
+                setTimeout(function () {
+                    el.scrollTop = item.scrollTop
+                }, 100)
+            } else {
+                el.scrollTop = item.scrollTop
+            }
+        })
+
         if (data.meta.consoles) {
             var consoles = data.meta.consoles;
             consoles.forEach(function (item) {
@@ -132,14 +135,14 @@
         $get({
             url: '/inspector/' + cliendId
         }, function (data) {
-
+            data = JSON.parse(data)
             documentBase = data.html;
-            updateinspectedWindow(JSON.parse(data));
+            $update(data);
 
             // receive document by websocket
             socket.on('server:inspector:' + cliendId, function (data) {
                 // data.time && console.log('Delay Time:', (new Date - clientTime + serverTime) - data.time)
-                updateinspectedWindow(data);
+                $update(data);
             });
 
         }, function (err, xhr) {
@@ -158,7 +161,6 @@
      *  initialize after window load
      **/
     window.addEventListener('load', function () {
-        updateFrameHeight();
         initialize();
     });
 

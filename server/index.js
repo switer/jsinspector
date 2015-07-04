@@ -126,6 +126,9 @@ clientSocket.on('connection', function(socket) {
 
         if (tmpData) {
             tmpData = JSON.parse(tmpData)
+
+            if (!data.browser) syncData.browser = data.browser = tmpData.browser
+
             // patching html text
             if (data.delta && !data.html && tmpData.html) {
 

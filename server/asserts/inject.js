@@ -14,9 +14,11 @@
     var differ, socket, anchor
 
     function fillURL(url) {
+        if (/\w+:/.test(url)) return url
+        if (url === null || url === undefined || url === '') return ''
         if (!anchor) anchor = document.createElement('a')
         anchor.href = url
-        return anchor.origin + anchor.pathname + anchor.search
+        return (anchor.origin || '') + (anchor.pathname || '') + anchor.search
     }
     /**
      *  Get document html
@@ -29,7 +31,7 @@
         if (lastOuterHTML === doc.outerHTML) return null
 
         var scripts = slice.call(document.scripts)
-        var links = slice.call(doc.querySelectorAll('link[rel="stylesheet"]'))
+        var links = slice.call(doc.querySelectorAll('link[rel="stylesheet"],a'))
         var styles = slice.call(doc.querySelectorAll('style'))
         var images = slice.call(doc.querySelectorAll('img'))
         var inputs = slice.call(doc.querySelectorAll('input,textarea'))
@@ -49,7 +51,7 @@
         links.forEach(function (item) {
             if (item.__jsinspecotr_fixed_url) return
             item.__jsinspecotr_fixed_url = true
-            item.setAttribute('href', fillURL(item.href))
+            item.setAttribute('href', fillURL(item.href || ''))
         });
         images.forEach(function (item) {
             if (item.__jsinspecotr_fixed_url) return
@@ -108,7 +110,7 @@
 
     /* =================================================================== */
     /**
-     *  use iframe for ajax CORS
+     *  request and callback
      **/
     var requestId = 1
     function $send (options, success, error) {
@@ -129,8 +131,8 @@
 
     /* =================================================================== */
     /**
-     *  replace cross-domain's links
-     **/
+     * Client inpspect ready
+     */
     document.addEventListener('connectionReady', function (e) {
         socket = e.socket
         differ = jsondiffpatch.create({
@@ -167,6 +169,7 @@
             var docHTML = getDocument()
             var uploadData = {
                 browser: {
+                    clientWidth: document.documentElement.clientWidth,
                     clientId: clientId,
                     userAgent: navigator.userAgent,
                     language: navigator.language,
@@ -201,12 +204,15 @@
          *  delta checking step
          **/
         function deltaCheckingStart () {
+
             dirtyChecking(function (dataPacket) {
                 // call when check for the delta change
+                dataPacket.meta.scrollElements = scrollMetas()
                 sendToQueue(dataPacket);
             });
 
             consoleChecking(function (dataPacket) {
+                dataPacket.meta.scrollElements = scrollMetas()
                 sendToQueue(dataPacket);
             });
 
@@ -219,6 +225,7 @@
                     if (dataPacket.delta) delete dataPacket.html;
                     // sync the meta
                     localBaseDocumentData.meta.scrollTop = dataPacket.meta.scrollTop
+                    localBaseDocumentData.meta.scrollElements = scrollMetas()
                     // TODO
                     sendToQueue(dataPacket);
                 }
@@ -226,11 +233,65 @@
             window.addEventListener('scroll', function () {
                 var dataPacket = {
                     meta: {
-                        scrollTop: document.body.scrollTop
+                        scrollTop: document.body.scrollTop,
+                        scrollElements: scrollMetas()
                     }
                 };
                 sendToQueue(dataPacket);
             });
+
+            var scrollElements = []
+            function scrollMetas() {
+                var nextSES = []
+                var scrollMetas = []
+                scrollElements.forEach(function (xpath) {
+                    var el = document.querySelector(xpath)
+                    if (el) {
+                        nextSES.push(xpath)
+                        scrollMetas.push({
+                            xpath: xpath,
+                            scrollTop: el.scrollTop
+                        })
+                    }
+                })
+                scrollElements = nextSES
+                return scrollMetas
+            }
+            function elementPath(el) {
+                var pn = el.parentNode
+                var selector = []
+                var tn
+                while(pn) {
+                    tn = el.tagName
+                    var childs = pn.children
+                    var nth
+                    [].slice.call(childs).some(function (c, index) {
+                        if (c == el) {
+                            nth = index + 1
+                            return true
+                        }
+                    })
+                    selector.unshift(tn + ':nth-child(' + nth + ')')
+                    if (pn !== document.body) {
+                        el = pn
+                        pn = el.parentNode
+                    } else {
+                        pn = null
+                    }
+                }
+                return 'body>' + selector.join('>')
+            }
+            document.documentElement.addEventListener('scroll', function (e) {
+                var tar = e.target
+                var xpath = elementPath(tar)
+                !~scrollElements.indexOf(xpath) && scrollElements.push(xpath)
+                var dataPacket = {
+                    meta: {
+                        scrollElements: scrollMetas()
+                    }
+                }
+                sendToQueue(dataPacket);
+            }, true)
         }
 
         function dirtyChecking (hasDirtyCallback) {

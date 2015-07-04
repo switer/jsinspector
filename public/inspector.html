@@ -1,18 +1,57 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>JSInspector devtools</title>
+    <title>JSInspector • Device</title>
     <script src="reverse.js"></script>
+    <link rel="stylesheet" href="iphone.css">
     <style>
-        body {margin: 0;display: block;height: auto;width: 100%;overflow:auto;-webkit-overflow-scrolling:touch;}
-        #inspectedWindow {display: block;width: 100%;}
+        body {
+            margin: 0;
+            display: block;
+            height: auto;
+            width: 100%;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: #f0f0f0;
+        }
+        
+        .iPhone {
+            width: 350px;
+            height: 600px;
+            margin-top: 10px;
+        }
+        .iPhoneInner {
+            width: 346px;
+            height: 596px;
+        }
+        
+        .iScreen {
+            width: 320px;
+            height: 500px
+        }
+        #inspectedWindow {
+            display: block;
+            width: 320px;
+            height: 500px;
+        }
     </style>
 </head>
+
 <body>
-    <!-- inpsctor inspected device view frame -->
-    <iframe src="about:blank" frameborder="0" id="inspectedWindow" ></iframe>
+    <div class="iPhone">
+        <div class="iPhoneInner">
+            <div class="smallTopCirc"></div>
+            <div class="oval"></div>
+            <div class="iScreen">
+                <iframe src="about:blank" frameborder="0" id="inspectedWindow"></iframe>
+            </div>
+            <div class="circButton"></div>
+        </div>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="inspector.js"></script>
 </body>
+
 </html>
