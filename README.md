@@ -15,25 +15,24 @@ npm install jsinspector -g
 jsinspector server
 ```
 
-JSInspector server's **port** default to 9000, open `Dashboard` page in browser:
+The server's **port** default to 9000, open `Dashboard` page in browser:
 ```url
 http://localhost:9000
 ```
 > Note: use `jsinspector server --port PROT` to listen specified port.
 
 
-## More Features
+## Features
 
-- **Console**
+- **Console from Remote**
 
-<center>![console sync](http://7rf30v.com1.z0.glb.clouddn.com/console.png)</center>
-
-Support console of `log`/`clear`/`error`/`info``warn`, `time` and `timeEnd`:
+Support console of `log`, `clear`, `error`/`info``warn`, `time` and `timeEnd`:
 
 ```javascript
 console.log(window); // -> {xxx: 'String', xxx2: 'Function', ..., window: 'Global'} 
 console.log(document); // -> {xxx: 'String', xxx2: 'Function', ..., body: 'HTMLBodyElement'}
 ```
+<center>![console sync](http://7rf30v.com1.z0.glb.clouddn.com/console.png)</center>
 
 - **Excute Script**
 
