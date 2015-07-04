@@ -19,8 +19,8 @@ var config = require('../config')
  * @type {express}
  */
 var app = new express()
-var server = http.createServer(app)
-var io = require('socket.io').listen(server, { log: false })
+var server = http.Server(app)
+var io = require('socket.io')(server, { log: false })
 
 var tmpDir = config.tmp_dir
 !fs.existsSync(tmpDir) && fs.mkdirSync(tmpDir)
