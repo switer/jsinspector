@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>JSInspector • Clients</title>
+    <link rel="stylesheet" href="device.css">
+    <link rel="stylesheet" href="client.css">
+    <style>
+    	html {
+    		font-family: 'proxima-nova', Consolas, sans-serif;
+    	}
+        @font-face {
+            font-family: "proxima-nova";
+            src: url("./ProximaNova-Light.otf");
+        }
+        body {margin: 0;background-color: white;height: 100%}
+		.iphone-body {height: 550px;width: 300px;margin: auto;margin-top: 20px;}
+		.iphone-screen {height: 410px;width: 272px;position: relative;}
+		#app {display: -webkit-box;position: absolute;width: 100%;height: 100%}
+		#app .device-menu {
+			width: 300px;
+			background-image: -webkit-linear-gradient(top,#664a86,#534292);
+			background-image: linear-gradient(to bottom,#664a86,#534292);
+			background-color: #534292;
+		}
+		#app .device {-webkit-box-flex:1;width: 20%;position: relative;}
+		#app .previewFrame {position: absolute;width: 100%;height: 100%;}
+		#app .frame-mask {position: absolute;width: 100%;height: 100%;top: 0;background-color: transparent;cursor: pointer;}
+		.iphone-body:hover{box-shadow: 0 0 5px 2px rgba(143, 173, 228, 1);}
+    </style>
+</head>
+<body>
+	<div id="app">
+		<div class="device-menu">
+			<header class="slogan">
+				JSInspector
+			</header>
+			<ul class="list" r-show="{inited}" style="display: none">
+				<r-repeat items="{clients}">
+				<li r-on="{click: onPreview}" 
+					r-class="{active: activeDevice == $value.cid}"
+					data-cid="{$value.cid}"
+				>
+					<i class="icon"
+						data-os="{$value.info.os.family}"
+						r-class="{
+							ios: /ios/.test($value.info.os.family.toLowerCase());
+							android: /android/.test($value.info.os.family.toLowerCase())
+						}"
+					></i>
+					<div class="link" href="{'/inspector.html?cid=' + $value.cid}" target="{'blank:' + $value.cid}">
+						{'Device: ' + $value.info.device.family + ' / ' + $value.info.browser.family + ' ' + $value.info.browser.version}
+					</div>
+				</li>
+				</r-repeat>
+			</ul>
+		</div>
+		<div class="device">
+			<div class="script">
+				Click icon to copy
+				<i class="copy" data-clipboard-text="{copyScript}">&nbsp;</i>
+				<input type="text" readonly="true" value="{script}">
+			</div>
+			<div class="iphone-body">
+				<div class="camera-1"></div>
+				<div class="camera-2"></div>
+				<div class="iphone-screen">
+					<iframe src="about:blank" frameborder="0" class="previewFrame"></iframe>
+					<div class="frame-mask"
+						r-on="{click: onView}"
+					></div>
+				</div>	
+			</div>
+		</div>
+	</div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="ZeroClipboard.js"></script>
+    <script src="zect.min.js"></script>
+    <script src="detect.js"></script>
+    <script src="device.js"></script>
+</body>
+</html>

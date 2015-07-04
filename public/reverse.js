@@ -2,7 +2,7 @@
  *  reverse inject script to client side
  **/
 !function (exports) {
-    'use strict;'
+    'use strict';
 
     var type = function (obj) {
         return Object.prototype.toString.call(obj).match(/object ([a-zA-Z]+)/)[1].toLowerCase()

@@ -1,9 +1,0 @@
-'use strict';
-
-var url = require('url')
-
-module.exports = function(req, res, next) {
-    var search = url.parse(req.url).search;
-    search && (req.inspectorId = search.replace(/^\?/, '').split('&')[0]);
-    next();
-}

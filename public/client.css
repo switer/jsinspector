@@ -1,0 +1,20 @@
+.slogan {color: white;font-size: 32px;text-align: center;padding: 5px 0;padding-top: 20px;padding-bottom: 10px;
+	box-shadow: 0 1px 0 rgba(0,0,0,.1);background-color: rgba(0,0,0,.05);}
+.list {display: block;list-style: none;padding: 0;margin: 10px 0;margin-top: 20px;}
+    .list li {line-height: 36px;display: -webkit-box;padding: 5px 10px;margin: 10px;cursor: pointer;}
+    .list li:hover{border-radius: 6px;background-color: rgba(255,255,255,.2);}
+    .list li.active{background-color: rgba(0,0,0,.1);border-radius: 6px;}
+    .list li .icon {background: url(./images/pc.png) center center no-repeat;height: 36px;width: 36px;
+    	background-size: 24px auto;display: block;margin-right: 5px;}
+    .list li .link {overflow: hidden;text-overflow: ellipsis;display: block;width: 50%;white-space: nowrap;-webkit-box-flex:1;
+    	color: #E8E8E8;text-decoration: none;font-size: 15px;}
+
+    .list li .icon.ios {background-image: url(./images/ios.png);}
+    .list li .icon.android {background-image: url(./images/android.png);}
+
+.device .script {height: 40px;border-bottom: 1px solid #E7E7EC;line-height: 40px;padding: 0 20px;color: #333;
+	display: -webkit-box;font-size: 16px;}
+	.device .script .copy {width: 40px;height: 40px;display: block;margin: 0 5px;background: url(./images/copy.png) center center no-repeat;
+		background-size: 30px auto;cursor: pointer;}
+	.device .script input {display: block;line-height: 40px;border: 0;padding: 0;margin: 0;outline: 0;
+		font-size: 14px;color: rgb(50, 113, 228);width: 20%;-webkit-box-flex:1;}

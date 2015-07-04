@@ -1,4 +1,6 @@
 !(function () {
+    'use strict';
+    
     function detectmob() {
         if ( navigator.userAgent.match(/Android/i)
             || navigator.userAgent.match(/webOS/i)
@@ -14,55 +16,68 @@
         }
     }
 
-    var isMobile = detectmob();
+    var isMobile = detectmob()
+    var slice = Array.prototype.slice
+    var socket = io.connect(window.location.origin + '/inpsector')
+    var cliendId = queryParse().cid
+    var inspectedWindow = document.querySelector('#inspectedWindow')
+    var documentBase = ''
+    var serverTime = <%= serverTime %>
+    var clientTime = + new Date
 
-
-    var slice = Array.prototype.slice,
-        socket = io.connect('<%= host %>/inpsector'),
-        inspectorId = '<%= inspectorId %>',
-        inspectedWindow = document.querySelector('#inspectedWindow'),
-        documentBase = '',
-        isDocumentInited = false,
-        jdpInstance = jsondiffpatch.create({
-            textDiff: {
-                maxLength: 60
-            }
-        });
-
-    function updateFrameHeight () {
-        if (isMobile) {
-            inspectedWindow.scrolling = 'no';
-            inspectedWindow.style.height = inspectedWindow.contentDocument.body.scrollHeight + 'px';
-        } else {
-            inspectedWindow.scrolling = 'yes';
-            inspectedWindow.style.position = 'absolute';
-            inspectedWindow.style.height = '100%';
+    function queryParse() {
+        var search = location.search
+        if (!search) return {};
+        var spliter = '&';
+        var query = search.replace(/^\?/, ''),
+            queries = {},
+            splits = query ? query.split(spliter) : null;
+        if (splits && splits.length > 0) {
+            splits.forEach(function(item) {
+                item = item.split('=');
+                var key = item[0],
+                    value = item[1];
+                queries[key] = value;
+            });
         }
+        return queries;
     }
     /**
      *  update inspected device view
      **/
-    function updateinspectedWindow (data) {
+    function $update (data) {
+        if (data.browser && data.browser.clientWidth) {
+            // inspectedWindow.style.width = data.browser.clientWidth + 'px'
+            inspectedWindow.style.width = '320px'
+        }
 
-        var ispDoc = inspectedWindow.contentDocument,
-            ispWin = inspectedWindow.contentWindow;
+        var ispDoc = inspectedWindow.contentDocument
+        var ispWin = inspectedWindow.contentWindow
+        var needReload = !!data.html
 
-        if (data.html) { // full amount download
+        if (needReload) { // full amount download
             documentBase = data.html;
             writeDocument(ispDoc, ispWin, documentBase);
-        } else if (data.delta) { // delta download
-            documentBase = jdpInstance.patch(documentBase, data.delta);
-            writeDocument(ispDoc, ispWin, documentBase);
         }
-        updateFrameHeight();
+
         if (data.meta.scrollTop !== undefined) {
             // update some metas only
-            if (isMobile) {
-                window.scrollTo(0, data.meta.scrollTop);
-            } else {
-                ispWin.scrollTo(0, data.meta.scrollTop)
-            }
+            ispWin.scrollTo(0, data.meta.scrollTop)
         }
+
+        // element partial scrolling
+        ;(data.meta.scrollElements || []).forEach(function (item) {
+            var el = ispDoc.querySelector(item.xpath)
+            if (!el) return
+            if (needReload) {
+                setTimeout(function () {
+                    el.scrollTop = item.scrollTop
+                }, 100)
+            } else {
+                el.scrollTop = item.scrollTop
+            }
+        })
+
         if (data.meta.consoles) {
             var consoles = data.meta.consoles;
             consoles.forEach(function (item) {
@@ -76,8 +91,8 @@
     function writeDocument (ispDoc, ispWin, html) {
         ispDoc.open();
         // remove inspector CORS frame src and save dom for Xpath
-        html = html.replace(/<iframe\s*src="[^"]*"\s*id="__jsinspector_cors_iframe"/, 
-            '<iframe src="" id="__jsinspector_cors_iframe"');
+        html = html.replace(/<iframe\s*src="[^"]*"\s*id="_jsinspector_cors_iframe"/, 
+            '<iframe src="" id="_jsinspector_cors_iframe"');
         ispDoc.write(html);
         ispDoc.close();
 
@@ -94,22 +109,11 @@
                 document.head.appendChild(item.cloneNode(true));
             });
         }
-
-        var jsiHrefs = Array.prototype.slice.call(ispDoc.querySelectorAll('[jsi-href]')),
-            jsiSrcs = Array.prototype.slice.call(ispDoc.querySelectorAll('[jsi-src]'));
-        jsiHrefs.forEach(function (item) {
-            item.setAttribute('href', item.getAttribute('jsi-href'));
-            item.removeAttribute('jsi-href');
-        })
-        jsiSrcs.forEach(function (item) {
-            item.setAttribute('src', item.getAttribute('jsi-src'));
-            item.removeAttribute('jsi-src');
-        })
     }
     /**
      *  Get init document content from jsinpsctor server as base document for delta download
      **/
-    function getInitDocument (success, error) {
+    function $get (options, success, error) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200 && xhr.responseText) {
@@ -118,7 +122,7 @@
                 error && error(xhr.response, xhr);
             }
         }
-        xhr.open('GET', '/devtools/init?<%= inspectorId %>');
+        xhr.open('GET', options.url);
         xhr.send(null);
     }
     /**
@@ -128,15 +132,17 @@
         retryTimes = 0;
 
     function initialize () {
-        getInitDocument (function (data) {
-            isDocumentInited = true;
+        $get({
+            url: '/inspector/' + cliendId
+        }, function (data) {
+            data = JSON.parse(data)
             documentBase = data.html;
-            updateinspectedWindow(JSON.parse(data));
+            $update(data);
 
-            // receive document sync data
-            socket.on('inspected:html:update:<%= inspectorId %>', function (data) {
-                data = JSON.parse(data);
-                updateinspectedWindow(data);
+            // receive document by websocket
+            socket.on('server:inspector:' + cliendId, function (data) {
+                // data.time && console.log('Delay Time:', (new Date - clientTime + serverTime) - data.time)
+                $update(data);
             });
 
         }, function (err, xhr) {
@@ -145,6 +151,7 @@
             } else if (retryTimes >= MAX_RETRY_TIMES) {
                 alert(err);
             } else {
+                retryTimes ++;
                 initialize();
             }
         });
@@ -154,13 +161,12 @@
      *  initialize after window load
      **/
     window.addEventListener('load', function () {
-        updateFrameHeight();
         initialize();
     });
 
     inject.on(function (payload) {
-        socket.emit('inspector:inject', {
-            id: '<%= inspectorId %>',
+        socket.emit('inspector:input', {
+            id: cliendId,
             payload: payload
         })
     })

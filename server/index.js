@@ -1,213 +1,188 @@
-var express = require('express')
 var fs = require('fs')
 var ejs = require('ejs')
 var url = require('url')
 var http = require('http')
 var path = require('path')
+var express = require('express')
+var uglify = require('uglify-js')
 var compress = require('compression')
 var bodyParser = require('body-parser')
-var rawBody = require('./middleware/rawbody')
-var clientIdParser = require('./middleware/clientid-parser')
-var clientDir = path.join(__dirname, '../public/client/')
-var app = new express()
-var server = http.createServer(app)
-var io = require('socket.io').listen(server)
+var cookieParser = require('cookie-parser')
 var jsondiffpatch = require('jsondiffpatch').create({
     textDiff: {
-        minLength: 60
+        minLength: 256
     }
 })
+var config = require('../config')
 /**
- * Memory Session
+ * JSInspector server and socket server
+ * @type {express}
  */
-var session = {}
-/**
- *  uitl functions
- **/
-function readFile(path) {
-    if (fs.existsSync(path)) {
-        return fs.readFileSync(path, 'utf-8');
-    } else {
-        return '';
-    }
-}
+var app = new express()
+var server = http.createServer(app)
+var io = require('socket.io').listen(server, { log: false })
 
-var tmpDir = path.join(__dirname, '../tmp')
+var tmpDir = config.tmp_dir
+!fs.existsSync(tmpDir) && fs.mkdirSync(tmpDir)
+
 /**
- *  initialize
- **/
-if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir);
-}
-app.use(compress());
+ * Enalbe gzip
+ */
+app.use(compress())
+
+app.get('/*.js', function (req, res, next) {
+    var fpath = path.join(__dirname, '../public', '.' + req.path)
+    if (!fs.existsSync(fpath)) return res.status(404).send(req.path + ' not found !')
+
+    var sourceCode = fs.readFileSync(fpath, 'utf-8')
+
+    if (req.path == '/inspector.js') sourceCode = ejs.render(sourceCode, {
+        serverTime: +new Date
+    })
+    if (config.enable_mini) {
+        res.send(uglify.minify(
+            sourceCode, 
+            {
+                fromString: true,
+                mangle: true,
+                compress: true
+            }
+        ).code)
+    } else {
+        res.send(sourceCode)
+    }
+})
+
+app.use(express.static(path.join(__dirname, '../public')))
+
 /**
  *  Global CORS
  **/
 app.use(function(req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin ? req.headers.origin : '*');
-    res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,HEAD,GET,OPTIONS,PATCH');
-    next();
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin ? req.headers.origin : '*')
+    res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,HEAD,GET,OPTIONS,PATCH')
+    next()
 })
-app.use(express.static(__dirname + '/../public'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
+app.use(cookieParser())
+app.enable('etag')
+app.use(require('./routes/inspector'))
+app.use(require('./routes/client'))
 
-/**
- *  Get inpsector form url
- **/
+app.get('/', function (req, res) {
+    res.send(fs.readFileSync(path.join(__dirname, '../public/clients.html'), 'utf-8'))
+})
+var clients = {}
+app.get('/clients', function (req, res, next) {
+    res.send(clients)
+})
+app.get('/preview/:cid', function (req, res, next) {
+    var fpath = path.join(tmpDir, 'client_'+ req.params.cid + '.json')
+    if (!fs.existsSync(fpath)) return res.status(404).send(req.path + ' not found !')
 
-/* =================================================================== */
-/**
- *  Client routes
- **/
-app.get('/inspector', clientIdParser, function(req, res) {
-    var script = readFile(path.join(clientDir, 'script.js'), 'utf-8'),
-        jsonify = readFile(path.join(clientDir, 'jsonify.js'), 'utf-8'),
-        consoleJS = readFile(path.join(clientDir, 'console.js'), 'utf-8'),
-        inject = readFile(path.join(clientDir, 'inject.js'), 'utf-8')
+    var tmpData = fs.readFileSync(fpath, 'utf-8')
+    tmpData = JSON.parse(tmpData)
+    res.send(tmpData.html)
+})
 
-    res.setHeader('Content-Type', 'application/javascript');
+io.set('log level', 5)
 
-    var host = 'http://' + req.headers.host
-    res.send(ejs.render(script, {
-        host: host,
-        inspectorId: req.inspectorId,
-        jsonify: jsonify,
-        console: consoleJS,
-        inject: ejs.render(inject, {
-            host: host,
-            inspectorId: req.inspectorId
+var inspectorSocket = io.of('/inpsector')
+var clientSocket = io.of('/client')
+var deviceSocket = io.of('/device')
+
+inspectorSocket.on('connection', function(socket) {
+    socket.on('inspector:input', function(data) {
+        clientSocket.emit('client:inject:' + data.id, data.payload)
+    })
+})
+
+clientSocket.on('connection', function(socket) {
+    var socketId
+	socket.on('client:init', function (payload) {
+
+        var clientId = socketId = payload.cid
+        var packetId = payload.pid
+        var data = payload.data
+        var file = path.join(tmpDir, 'client_' + clientId + '.json')
+
+        // connect session
+        clients[clientId] = data.browser
+
+        // save as base document data
+        fs.writeFileSync(file, JSON.stringify(data), 'utf-8')
+        // tell inspector
+        inspectorSocket.emit('server:inspector:' + clientId, data)
+
+        socket.emit('server:answer:init:' + clientId, {
+            cid: clientId,
+            pid: packetId
         })
-    }));
-});
-/**
- *  Use for client CORS prox
- **/
-app.get('/src', function(req, res) {
-    var srcUrl = req.query.url.replace(/"/g, '');
-    if (!srcUrl) {
-        // Bad Request
-        res.status(400).send('Uncorrect source url, example: /src?url=xxx');
-        return;
-    }
-    http.get(srcUrl, function(resp) {
-        resp.on('data', function(data) {
-            res.write(data);
-        });
-        resp.on('end', function() {
-            res.end();
-        });
-    }).on('error', function(e) {
-        res.status(500).send(e.message);
-    });
-});
-/**
- *  Client document upload API
- **/
-app.post('/html/init', clientIdParser, rawBody, function(req, res) {
-    var content = req.rawBody,
-        updatedData = JSON.parse(content);
+        // device connect
+        deviceSocket.emit('device:update')
+    })
 
-    // record in session
-    session[req.inspectorId] = updatedData.ssid;
-    /**
-     *  save
-     **/
-    fs.writeFileSync(path.join(tmpDir, 'inspector_html_' + req.inspectorId + '.json'), content, 'utf-8');
-    io.sockets.emit('inspected:html:update:' + req.inspectorId, content);
-    res.status(200).send('ok');
-});
+    socket.on('disconnect', function () {
+        if (socketId) delete clients[socketId]
 
-app.post('/html/delta', clientIdParser, rawBody, function(req, res) {
-    var content = req.rawBody,
-        updatedData = JSON.parse(content), // currently upload data
-        lastTmpData, // last time update data
-        syncData; // sync the data for devtool
+        // device disconnect
+        deviceSocket.emit('device:update')
+    })
+    
+    socket.on('client:update', function (payload) {
+        var clientId = payload.cid
+        var packetId = payload.pid
+        var data = payload.data
+        var file = path.join(tmpDir, 'client_' + clientId + '.json')
+        // syncData is used to tell inspector what is happening of client
+        var tmpData = fs.readFileSync(file, 'utf-8')
+        var syncData
 
-    /**
-     *  one inspectorId match one session
-     **/
-    if (updatedData.ssid != session[req.inspectorId]) {
-        res.status(400).send('Session is out of date, please reload!')
-        return;
-    }
-    /**
-     *  @html {String}
-     *  @delta {TextDelta}
-     *  @meta {Object}
-     **/
-    lastTmpData = fs.readFileSync(path.join(tmpDir, 'inspector_html_' + req.inspectorId + '.json'), 'utf-8');
-    lastTmpData = JSON.parse(lastTmpData);
-    syncData = JSON.parse(content);
+        function fail () {
+            socket.emit('server:answer:init:' + clientId, {
+                cid: clientId,
+                pid: packetId,
+                error: { code: 4000, message: 'Base HTML not found!' }
+            })
+        }
+        syncData = JSON.parse(JSON.stringify(data))
 
-    // patching html text
-    if (updatedData.delta && !updatedData.html && lastTmpData.html) {
+        if (tmpData) {
+            tmpData = JSON.parse(tmpData)
 
-        // full amount release, currently I can't support delta release
-        updatedData.html = jsondiffpatch.patch(lastTmpData.html, updatedData.delta);
-        syncData.html = updatedData.html;
-        delete syncData.delta;
+            if (!data.browser) syncData.browser = data.browser = tmpData.browser
 
-    } else if (!updatedData.html && lastTmpData.html) {
-        // match when receive the data packet only the meta
-        updatedData.html = lastTmpData.html;
-    }
+            // patching html text
+            if (data.delta && !data.html && tmpData.html) {
 
-    syncData = JSON.stringify(syncData);
-    updatedData = JSON.stringify(updatedData);
+                // full amount release, currently I can't support delta release
+                syncData.html = data.html = jsondiffpatch.patch(tmpData.html, data.delta);
+                delete data.delta;
 
-    /**
-     *  save
-     **/
-    fs.writeFileSync('tmp/inspector_html_' + req.inspectorId + '.json', updatedData, 'utf-8');
-    /**
-     *  devtools sync
-     **/
-    inspectorSocket.emit('inspected:html:update:' + req.inspectorId, syncData);
+            } else if (!data.html && tmpData.html) {
+                // match when receive the data packet only the meta
+                data.html = tmpData.html;
+            } else if (!data.html) {
+                return fail()
+            }
 
-    res.send('ok');
-});
+            // save newest inspect data
+            fs.writeFileSync(file, JSON.stringify(data), 'utf-8')
 
-/**
- *  Inspctor routes
- **/
-app.get('/devtools', clientIdParser, function(req, res, next) {
-    if (!req.inspectorId) {
-        res.redirect('/');
-        return;
-    }
-    var html = fs.readFileSync(path.join(__dirname, '../public/devtools/devtools.html'), 'utf-8'),
-        script = fs.readFileSync(path.join(__dirname, '../public/devtools/devtools.js'), 'utf-8'),
-        host = req.headers.host;
+            // tell inspector
+            inspectorSocket.emit('server:inspector:' + clientId, syncData)
+            socket.emit('server:answer:update:' + clientId, {
+                cid: clientId,
+                pid: packetId
+            })
 
-    script = ejs.render(script, {
-        host: host.match(/^http\:/) ? host : 'http://' + host,
-        inspectorId: req.inspectorId
-    });
-    res.send(ejs.render(html, {
-        devtools: script
-    }));
-});
-app.get('/devtools/init', clientIdParser, function(req, res) {
-    var file = readFile(path.join(tmpDir, 'inspector_html_' + req.inspectorId + '.json') );
-    if (file) {
-        res.send(file);
-    } else {
-        res.status(404).send('Please inject the script to your code !')
-    }
-});
+        } else {
+            return fail()
+        }
+
+    })
+})
 
 module.exports = server
 
-/* Socket.io */
-io.set('log level', 1);
-var inspectorSocket = io.of('/inpsector')
-var clientSocket = io.of('/client')
-inspectorSocket.on('connection', function(socket) {
-    socket.on('inspector:inject', function(data) {
-        clientSocket.emit('client:inject:' + data.id, data.payload)
-    })
-});
-clientSocket.on('connection', function() {})
+
+
