@@ -29,7 +29,7 @@
 
 .iPhoneInner .circButton {
     background: #fff;
-    border: solid 2px #3b3b3b;
+    border: solid 2px #6f6f6f;
     width: 36px;
     height: 36px;
     position: relative;
@@ -37,14 +37,14 @@
     border-radius: 50%;
     top: 48px;
     cursor: pointer;
-    -webkit-box-shadow: inset 0 0px 3px rgba(0, 0, 0, .8);
-    box-shadow: inset 0 0px 3px rgba(0, 0, 0, .8);
+    /*-webkit-box-shadow: inset 0 0px 3px rgba(0, 0, 0, .8);*/
+    /*box-shadow: inset 0 0px 3px rgba(0, 0, 0, .8);*/
 }
 
 .iPhoneInner .smallTopCirc {
-    background-color: #1f1f1f;
-    background-image: -webkit-linear-gradient(#1f1f1f, #141414);
-    background-image: linear-gradient(#1f1f1f, #141414);
+    background-color: #6f6f6f;
+    background-image: -webkit-linear-gradient(#6f6f6f, #141414);
+    background-image: linear-gradient(#6f6f6f, #141414);
     width: 6px;
     height: 6px;
     border-radius: 50%;
@@ -54,9 +54,9 @@
 }
 
 .iPhoneInner .oval {
-    background-color: #1f1f1f;
-    background-image: -webkit-linear-gradient(#1f1f1f, #141414);
-    background-image: linear-gradient(#1f1f1f, #141414);
+    background-color: #6f6f6f;
+    background-image: -webkit-linear-gradient(#6f6f6f, #141414);
+    background-image: linear-gradient(#6f6f6f, #141414);
     width: 50px;
     height: 4px;
     top: 14px;
@@ -73,10 +73,11 @@
     margin: 0 auto;
     top: 40px;
     overflow: hidden;
-    background-color: #1f1f1f;
-    background-image: -webkit-linear-gradient(#1f1f1f, #141414);
-    background-image: linear-gradient(#1f1f1f, #141414);
-    border: solid 2px #3b3b3b;
+    background-color: #333;
+    background-image: -webkit-linear-gradient(#6f6f6f, #141414);
+    background-image: linear-gradient(#6f6f6f, #141414);
+    border: solid 1px #6f6f6f;
+    border-radius: 3px;
     -webkit-transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
     -moz-transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);
     transition: all 0.4s cubic-bezier(0.6, 0.04, 0.98, 0.335);

@@ -68,15 +68,27 @@ app.enable('etag')
 app.use(require('./routes/inspector'))
 app.use(require('./routes/client'))
 
+app.get('/', function (req, res) {
+    res.send(fs.readFileSync(path.join(__dirname, '../public/clients.html'), 'utf-8'))
+})
 var clients = {}
 app.get('/clients', function (req, res, next) {
     res.send(clients)
+})
+app.get('/preview/:cid', function (req, res, next) {
+    var fpath = path.join(tmpDir, 'client_'+ req.params.cid + '.json')
+    if (!fs.existsSync(fpath)) return res.status(404).send(req.path + ' not found !')
+
+    var tmpData = fs.readFileSync(fpath, 'utf-8')
+    tmpData = JSON.parse(tmpData)
+    res.send(tmpData.html)
 })
 
 io.set('log level', 5)
 
 var inspectorSocket = io.of('/inpsector')
 var clientSocket = io.of('/client')
+var deviceSocket = io.of('/device')
 
 inspectorSocket.on('connection', function(socket) {
     socket.on('inspector:input', function(data) {
@@ -85,9 +97,10 @@ inspectorSocket.on('connection', function(socket) {
 })
 
 clientSocket.on('connection', function(socket) {
-
+    var socketId
 	socket.on('client:init', function (payload) {
-        var clientId = payload.cid
+
+        var clientId = socketId = payload.cid
         var packetId = payload.pid
         var data = payload.data
         var file = path.join(tmpDir, 'client_' + clientId + '.json')
@@ -104,6 +117,15 @@ clientSocket.on('connection', function(socket) {
             cid: clientId,
             pid: packetId
         })
+        // device connect
+        deviceSocket.emit('device:update')
+    })
+
+    socket.on('disconnect', function () {
+        if (socketId) delete clients[socketId]
+
+        // device disconnect
+        deviceSocket.emit('device:update')
     })
     
     socket.on('client:update', function (payload) {
