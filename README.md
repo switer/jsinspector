@@ -1,92 +1,56 @@
 ![jsinspector](http://switer.github.io/live/images/jsinspector.png)
 ===================================================================
-Synchronize DOMContent, Console(logs) and Errors from remote browser.
-It makes a web projection. You can use for remote demonstration or debugging mobile web app.
 
-## Get Started
+**JSInspector** using a easy and simple way to inpsect website that from another device .
 
-* Visit __jsinspector__ [home page](http://jsinspector.com/)
-* Inject the __script__ which from home page to your webapp's html
-* After running your website that has injected the jsinspector script, 
-  open __inspector window__ (which has a button-link on home page), your can see the inspected page on __inspector window__
+<center>![show](http://7rf30v.com1.z0.glb.clouddn.com/jsinspector.gif)</center>
 
-## Local Server
-
-#### Installing
+## Install and Run
+For [node](http://nodejs.org) via [npm](http://npmjs.org):
 ```bash
-git clone https://github.com/switer/jsinspector.git jsinspector
+npm install jsinspector -g
+
+jsinspector server
+```
+JSInspector server's port default is 9000, open `Dashboard` page in browser:
+```url
+http://localhost:9000
 ```
 
-#### Startg Server
-JSInspector server require [node.js](http://nodejs.org). After install node , running server with [npm](http://npmjs.org) (node.js package manager).
-```bash
-cd ./jsinspector
-npm i
-npm start
+## Usage
+Open **device** device dashboard, 
+
+## More Features
+
+- **Console**
+
+<center>![console sync](http://7rf30v.com1.z0.glb.clouddn.com/console.png)</center>
+
+Support console of `log`/`clear`/`error`/`info``warn`, `time` and `timeEnd`:
+
+```javascript
+console.log(window); // -> {xxx: 'String', xxx2: 'Function', ..., window: 'Global'} 
+console.log(document); // -> {xxx: 'String', xxx2: 'Function', ..., body: 'HTMLBodyElement'}
 ```
 
-#### Visit home Page and inject inspector Script
-Inject the __script__ (which has an inspector id) from __home page__ to remote website, then visit __inspector__ (your can get then link on home page):
-```bash
-## home page
-https://yourhost:port/
-## inspector page
-https://yourhost:port/devtools?xxx-xxx
-```
+- **Excute Script**
 
-## Features
-
-#### Inject codes to client
-use `inject` api , so you can inject the code from devtools `console` to client side.
-Tap the code in `devtools` website's `console` panel:
+Using `inject` method to excute script in remote browser:
 ```js
 
-// inject()
-inject('console.log("window")') // will get window object from client side
-inject('console.log("%s","%s")', 'document', 'window') // also support placeholder
+inject('console.log("window")')
 
-// inject() code block  
+// block codes
 inject(function () {
-    console.log(document) // will get document object from client side
-    console.log(window) // will get window object from client side
+    console.log(document)
 })
 
-// inject.js()
-inject.js('http://yourhost/lib.js') // will inject that script resource to client side
+// insert external script
+inject.js('http://yourhost/lib.js')
 
-// inject.css()
-inject.css('http://yourhost/style.css') // will inject that stylesheet resource to client side
+// insert external style sheet
+inject.css('http://yourhost/style.css')
 ```
-#### HTML sync
-This is the primary feature, all the html of client will be synchroized to remote server and can be view on
-__inspector__ window(eg. http://yourhost/devtools?xxxx-xxxxx).
-
-#### Console sync
-support console: `log`, `clear`, `error`, `info`, `warn`, `time` and `timeEnd`, these console api will be synchroized and show in inspector's `devtool-console panel`.
-It support every object to console.log, such as:
-```javascript
-// global object
-console.log(window); // -> {xxx: 'String', xxx2: 'Function', ..., window: 'Global'} 
-// document object
-console.log(document); // -> {xxx: 'String', xxx2: 'Function', ..., body: 'HTMLBodyElement'}
-// null
-console.log(null); // -> null
-// undefined will be a undefined string
-console.log(undefined); // -> 'undefined'
-// NaN will be a NaN string
-console.log(NaN); // -> 'NaN'
-// No-JSON object : function will be function code string
-console.log({name: function () {console.log('xxxx');}}); // -> { name: "function () {console.log('xxxx');}" }
-// No-JSON object : Element Node will be tagHTML(outerHTML.replace(innerHTML, ''))
-console.log([1, 2, document.body]); // -> [1, 2, "<body></body>"]
-// No-JSON object : Text Node will be textContent
-console.log(document.body.childNodes[0]); // -> "\r\nxxxx"
-```
-
-#### Exceptions sync
-use `window.onerror`(window.addEventListener('error')) to catch global exceptions. Those error will be synchroized in 
-inspector's `devtool-console panel`. use output format: `console.error(error, src + lineNumber)`
-
 
 
 ## License
