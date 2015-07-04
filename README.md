@@ -19,7 +19,7 @@ The server's **port** default to 9000, open `Dashboard` page in browser:
 ```url
 http://localhost:9000
 ```
-> Note: use `jsinspector server --port PROT` to listen specified port.
+> Note: use `jsinspector server --port PORT` to start server with specified port.
 
 
 ## Features
