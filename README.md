@@ -26,7 +26,7 @@ http://localhost:9000
 
 - **Console from Remote**
 
-Support console of `log`, `clear`, `error`/`info``warn`, `time` and `timeEnd`:
+Support console of `log`, `clear`, `error`, `info`, `warn`, `time` and `timeEnd`:
 
 ```javascript
 console.log(window); // -> {xxx: 'String', xxx2: 'Function', ..., window: 'Global'} 
