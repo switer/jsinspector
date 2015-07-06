@@ -34,9 +34,9 @@ console.log(document); // -> {xxx: 'String', xxx2: 'Function', ..., body: 'HTMLB
 ```
 <center>![console sync](http://7rf30v.com1.z0.glb.clouddn.com/console.png)</center>
 
-- **Excute Script**
+- **Execute Script**
 
-Using `inject` method to excute script in remote browser:
+Using `inject` method to execute script in remote browser:
 ```js
 
 inject('console.log("window")')
