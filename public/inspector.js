@@ -45,10 +45,26 @@
     /**
      *  update inspected device view
      **/
+    var responsiveElements = [].slice.call(document.querySelectorAll('.iPhone,.iPhoneInner,.iScreen,#inspectedWindow'))
+    var widthPatches = [30, 26, 0, 0]
+    var heightPatches = [100, 96, 0, 0]
+
     function $update (data) {
         if (data.browser && data.browser.clientWidth) {
             // inspectedWindow.style.width = data.browser.clientWidth + 'px'
-            inspectedWindow.style.width = '320px'
+            var width = data.browser.clientWidth
+            var height = data.browser.clientHeight
+            var cwidth = document.documentElement.clientWidth - 50
+            var cheight = document.documentElement.clientHeight - 130
+
+            width = width > cwidth ? cwidth : width
+            height = height > cheight ? cheight : height
+
+            responsiveElements.forEach(function (el, index) {
+                el.style.width = (width + widthPatches[index]) + 'px'
+                el.style.height = (height + heightPatches[index]) + 'px'
+            })
+            // inspectedWindow.style.width = '320px'
         }
 
         var ispDoc = inspectedWindow.contentDocument

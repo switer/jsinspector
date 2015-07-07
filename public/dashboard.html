@@ -3,20 +3,22 @@
 <head>
 	<meta charset="UTF-8">
 	<link rel="icon" href="favicon.ico">
-	<title>JSInspector • Clients</title>
-    <link rel="stylesheet" href="device.css">
-    <link rel="stylesheet" href="client.css">
+	<title>JSInspector • Dashboard</title>
+    <link rel="stylesheet" href="css/device.css">
+    <link rel="stylesheet" href="css/client.css">
     <style>
     	html {
     		font-family: 'proxima-nova', Consolas, sans-serif;
     	}
         @font-face {
             font-family: "proxima-nova";
-            src: url("./ProximaNova-Light.otf");
+            src: url("./asserts/ProximaNova-Light.otf");
         }
         body {margin: 0;background-color: white;height: 100%}
-		.iphone-body {height: 550px;width: 300px;margin: auto;margin-top: 20px;}
-		.iphone-screen {height: 410px;width: 272px;position: relative;}
+		.iphone-body {height: 550px;width: 300px;margin: auto;margin-top: 20px;cursor: pointer;}
+		/*.iphone-body:hover{box-shadow: 0 0 5px 2px rgba(143, 173, 228, 1);}*/
+		.iphone-screen {height: 410px;width: 272px;position: relative;background-color: #333;}
+		.iphone-screen.active{background-color: #fff;}
 		#app {display: -webkit-box;position: absolute;width: 100%;height: 100%}
 		#app .device-menu {
 			width: 300px;
@@ -27,7 +29,6 @@
 		#app .device {-webkit-box-flex:1;width: 20%;position: relative;}
 		#app .previewFrame {position: absolute;width: 100%;height: 100%;}
 		#app .frame-mask {position: absolute;width: 100%;height: 100%;top: 0;background-color: transparent;cursor: pointer;}
-		.iphone-body:hover{box-shadow: 0 0 5px 2px rgba(143, 173, 228, 1);}
     </style>
 </head>
 <body>
@@ -58,18 +59,15 @@
 		</div>
 		<div class="device">
 			<div class="script">
-				Click icon to copy
 				<i class="copy" data-clipboard-text="{copyScript}">&nbsp;</i>
-				<input type="text" readonly="true" value="{script}">
+				<div>{script}</div>
 			</div>
-			<div class="iphone-body">
+			<div class="iphone-body" r-on="{click: onView}">
 				<div class="camera-1"></div>
 				<div class="camera-2"></div>
-				<div class="iphone-screen">
+				<div class="iphone-screen" r-class="{active: activeDevice}">
 					<iframe src="about:blank" frameborder="0" class="previewFrame"></iframe>
-					<div class="frame-mask"
-						r-on="{click: onView}"
-					></div>
+					<div class="frame-mask"></div>
 				</div>	
 			</div>
 		</div>

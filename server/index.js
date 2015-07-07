@@ -69,7 +69,7 @@ app.use(require('./routes/inspector'))
 app.use(require('./routes/client'))
 
 app.get('/', function (req, res) {
-    res.send(fs.readFileSync(path.join(__dirname, '../public/clients.html'), 'utf-8'))
+    res.send(fs.readFileSync(path.join(__dirname, '../public/dashboard.html'), 'utf-8'))
 })
 var clients = {}
 app.get('/clients', function (req, res, next) {
@@ -83,8 +83,6 @@ app.get('/preview/:cid', function (req, res, next) {
     tmpData = JSON.parse(tmpData)
     res.send(tmpData.html)
 })
-
-io.set('log level', 5)
 
 var inspectorSocket = io.of('/inpsector')
 var clientSocket = io.of('/client')

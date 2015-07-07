@@ -31,7 +31,7 @@
         if (lastOuterHTML === doc.outerHTML) return null
 
         var scripts = slice.call(document.scripts)
-        var links = slice.call(doc.querySelectorAll('link[rel="stylesheet"],a'))
+        var links = slice.call(doc.querySelectorAll('link[rel="stylesheet"],a,link[rel="icon"]'))
         var styles = slice.call(doc.querySelectorAll('style'))
         var images = slice.call(doc.querySelectorAll('img'))
         var inputs = slice.call(doc.querySelectorAll('input,textarea'))
@@ -98,12 +98,14 @@
                     //     } else return m
                     // })
                     .replace(/<script\s[^\>]*?>[\s\S]*?<\/script>/g, function (m) {
-                        var l = m.match(/^<script\s[^\>]*?>/)[0]
+                        var l = m.match(/^<script\s[^\>]*?>/m)[0]
+                        var scriptTypeReg = /\stype="application\/javascript"/m
 
                         if (!/\sjsi-script=/.test(l)) return m
-                        else if (/\stype="/.test(l) && !/\stype\s/.test(l) && !/\stype="application\/javascript"/.test(l)) return m
-                        else if (!/\ssrc\b/.test(l)) return m.replace(/^<script/, '<script src=""')
-                        else return m.replace(/\bsrc=/, 'src="" _src=')
+                        m = m.replace(/\sjsi-script=""/, '')
+                        if (/\stype="/.test(l) && !scriptTypeReg.test(l)) return m
+                        else if (scriptTypeReg.test(l)) return m.replace(scriptTypeReg, 'type="application\/javascript-x"')
+                        else return m.replace(/^<script\b/, '<script type="application/javascript-x"')
                     })
         return doctype + content
     }
@@ -170,6 +172,7 @@
             var uploadData = {
                 browser: {
                     clientWidth: document.documentElement.clientWidth,
+                    clientHeight: document.documentElement.clientHeight,
                     clientId: clientId,
                     userAgent: navigator.userAgent,
                     language: navigator.language,
