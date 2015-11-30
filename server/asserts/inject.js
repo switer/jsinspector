@@ -99,13 +99,14 @@
                     // })
                     .replace(/<script\s[^\>]*?>[\s\S]*?<\/script>/g, function (m) {
                         var l = m.match(/^<script\s[^\>]*?>/m)[0]
-                        var scriptTypeReg = /\stype="application\/javascript"/m
-
+                        var scriptTypeReg = /\stype="(application|text)\/javascript"/m
                         if (!/\sjsi-script=/.test(l)) return m
                         m = m.replace(/\sjsi-script=""/, '')
                         if (/\stype="/.test(l) && !scriptTypeReg.test(l)) return m
-                        else if (scriptTypeReg.test(l)) return m.replace(scriptTypeReg, 'type="application\/javascript-x"')
-                        else return m.replace(/^<script\b/, '<script type="application/javascript-x"')
+                        else if (scriptTypeReg.test(l)) return m.replace(scriptTypeReg, function (n, t) {
+                            return ' type="jsi-' + t + '\/javascript"'
+                        })
+                        else return m.replace(/^<script\b/, '<script type="jsi/javascript"')
                     })
         return doctype + content
     }
