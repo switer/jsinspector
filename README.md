@@ -1,5 +1,6 @@
 ![jsinspector](http://switer.github.io/live/images/jsinspector.png)
 ===================================================================
+[![npm version](https://badge.fury.io/js/jsinspector.svg)](https://badge.fury.io/js/jsinspector)
 
 **JSInspector** using a easy and simple way to inpsect website that from another device .
 
