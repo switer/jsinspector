@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+
+var commander = require('commander')
+var meta = require('../package.json')
+
+commander
+	.version(meta.version)
+	.option('-p, --port <n>', 'Start server with specified port.')
+
+
+commander
+	.command('server')
+	.description('Start inspector server')
+	.action(function () {
+		var server = require('../server/index')
+		var port = process.env.PORT || commander.port || 9000
+		server.listen(port, function() {
+		    console.log("Inspector server listening on " + port)
+		})
+	})
+
+commander.parse(process.argv)

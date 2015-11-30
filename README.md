@@ -1,70 +1,58 @@
 ![jsinspector](http://switer.github.io/live/images/jsinspector.png)
 ===================================================================
-Synchronize DOMContent, Console(logs) and Errors from remote browser.
-It makes a web projection. You can use for remote demonstration or debugging mobile web app.
+[![npm version](https://badge.fury.io/js/jsinspector.svg)](https://badge.fury.io/js/jsinspector)
 
-## Quickly Started
+Mobile debug toolkit, include **console.log**, **HTML Inspector** and **script inject api**.
 
-* Visit __jsinspector__ [home page](http://jsinspector.com/)
-* Inject the __script__ which from home page to your webapp's html
-* After running your website that has injected the jsinspector script, 
-  open __inspector window__ (which has a button-link on home page), your can see the inspected page on __inspector window__
+<center>![show](http://7rf30v.com1.z0.glb.clouddn.com/jsinspector.gif)</center>
 
-## Running JSInspector Server
-
-#### Installing
+## Install and Run
+For [node](http://nodejs.org) via [npm](http://npmjs.org):
 ```bash
-git clone https://github.com/switer/jsinspector.git jsinspector
+npm install jsinspector -g
 ```
 
-#### Starting Server
-JSInspector server require [node.js](http://nodejs.org). After install node , running server with [npm](http://npmjs.org) (node.js package manager).
 ```bash
-cd ./jsinspector
-npm i
-npm start
+jsinspector server
 ```
 
-### Visit Home Page And Inject The Script
-Inject the __script__ (which has an inspector id) from __home page__ to remote website, then visit __inspector__ (your can get then link on home page):
-```bash
-## home page
-https://yourhost:port/
-## inspector page
-https://yourhost:port/devtools?xxx-xxx
+The server's **port** default to 9000, open `Dashboard` page in browser:
+```url
+http://localhost:9000
 ```
+> Note: use `jsinspector server --port PORT` to start server with specified port.
+
 
 ## Features
-#### HTML sync
-is the primary feature, all the html of client will be synchroized to remote server and can be view on
-__inspector__ window(eg. http://yourhost/devtools?xxxx-xxxxx).
 
-#### Console sync
-support console: `log`, `clear`, `error`, `info`, `warn`, `time` and `timeEnd`, these console api will be synchroized and show in inspector's `devtool-console panel`.
-It support every object to console.log, such as:
+- **Console from Remote**
+
+Support console of `log`, `clear`, `error`, `info`, `warn`, `time` and `timeEnd`:
+
 ```javascript
-// global object
 console.log(window); // -> {xxx: 'String', xxx2: 'Function', ..., window: 'Global'} 
-// document object
 console.log(document); // -> {xxx: 'String', xxx2: 'Function', ..., body: 'HTMLBodyElement'}
-// null
-console.log(null); // -> null
-// undefined will be a undefined string
-console.log(undefined); // -> 'undefined'
-// NaN will be a NaN string
-console.log(NaN); // -> 'NaN'
-// No-JSON object : function will be function code string
-console.log({name: function () {console.log('xxxx');}}); // -> { name: "function () {console.log('xxxx');}" }
-// No-JSON object : Element Node will be tagHTML(outerHTML.replace(innerHTML, ''))
-console.log([1, 2, document.body]); // -> [1, 2, "<body></body>"]
-// No-JSON object : Text Node will be textContent
-console.log(document.body.childNodes[0]); // -> "\r\nxxxx"
 ```
+<center>![console sync](http://7rf30v.com1.z0.glb.clouddn.com/console.png)</center>
 
-#### Exceptions sync
-use `window.onerror`(window.addEventListener('error')) to catch global exceptions. Those error will be synchroized in 
-inspector's `devtool-console panel`. use output format: `console.error(error, src + lineNumber)`
+- **Execute Script**
 
+Using `inject` method to execute script in remote browser:
+```js
+
+inject('console.log("window")')
+
+// block codes
+inject(function () {
+    console.log(document)
+})
+
+// insert external script
+inject.js('http://yourhost/lib.js')
+
+// insert external style sheet
+inject.css('http://yourhost/style.css')
+```
 
 
 ## License
@@ -72,21 +60,3 @@ inspector's `devtool-console panel`. use output format: `console.error(error, sr
 The MIT License (MIT)
 
 Copyright (c) 2014 guankaishe
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
