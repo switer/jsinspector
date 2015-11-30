@@ -22,7 +22,7 @@
     var cliendId = queryParse().cid
     var inspectedWindow = document.querySelector('#inspectedWindow')
     var documentBase = ''
-    var serverTime = <%= serverTime %>
+    var serverTime = Number('<%= serverTime %>')
     var clientTime = + new Date
 
     function queryParse() {

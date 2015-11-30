@@ -30,27 +30,52 @@ var tmpDir = config.tmp_dir
  */
 app.use(compress())
 
-app.get('/*.js', function (req, res, next) {
-    var fpath = path.join(__dirname, '../public', '.' + req.path)
-    if (!fs.existsSync(fpath)) return res.status(404).send(req.path + ' not found !')
-
-    var sourceCode = fs.readFileSync(fpath, 'utf-8')
-
-    if (req.path == '/inspector.js') sourceCode = ejs.render(sourceCode, {
-        serverTime: +new Date
-    })
-    if (config.enable_mini) {
-        res.send(uglify.minify(
+var sourceCaches = {}
+var publicDir = path.join(__dirname, '../public')
+function loadFile(p, minify) {
+    var sourceCode = fs.readFileSync(p, 'utf-8')
+    if (minify) {
+        sourceCode = uglify.minify(
             sourceCode, 
             {
                 fromString: true,
                 mangle: true,
                 compress: true
             }
-        ).code)
-    } else {
-        res.send(sourceCode)
+        ).code
     }
+    return sourceCode
+}
+if (!config.isDev) {
+    var files = fs.readdirSync(publicDir)
+    process.stdout.write('\nPreloading files ..')
+    files.forEach(function (f) {
+        if (/\.js$/.test(f)) {
+            var source = loadFile(path.join(publicDir, f), config.enable_mini)
+            sourceCaches['/' + f] = source
+            process.stdout.write('.')
+        }
+    })
+    console.log('')
+}
+
+app.get('/*.js', function (req, res, next) {
+    var fpath = path.join(publicDir, '.' + req.path)
+    if (!fs.existsSync(fpath)) return res.status(404).send(req.path + ' not found !')
+
+    var sourceCode = ''
+    if (sourceCaches[req.path]) 
+        sourceCode = sourceCaches[req.path]
+    else {
+        sourceCode = loadFile(fpath, config.enable_mini)
+        if (!config.isDev) {
+            sourceCaches[req.path] = sourceCode
+        }
+    }
+    if (req.path == '/inspector.js') sourceCode = ejs.render(sourceCode, {
+        serverTime: +new Date
+    })
+    res.send(sourceCode)
 })
 
 app.use(express.static(path.join(__dirname, '../public')))
