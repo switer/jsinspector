@@ -2,7 +2,7 @@
 ===================================================================
 [![npm version](https://badge.fury.io/js/jsinspector.svg)](https://badge.fury.io/js/jsinspector)
 
-**JSInspector** using a easy and simple way to inpsect website that from another device .
+Mobile debug toolkits, include **console.log**, inspect HTML and inject script.
 
 <center>![show](http://7rf30v.com1.z0.glb.clouddn.com/jsinspector.gif)</center>
 
