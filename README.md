@@ -2,7 +2,7 @@
 ===================================================================
 [![npm version](https://badge.fury.io/js/jsinspector.svg)](https://badge.fury.io/js/jsinspector)
 
-Mobile debug toolkits, include **console.log**, inspect HTML and inject script.
+Mobile debug toolkit, include **console.log**, **HTML Inspector** and **script inject api**.
 
 <center>![show](http://7rf30v.com1.z0.glb.clouddn.com/jsinspector.gif)</center>
 
