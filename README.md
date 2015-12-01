@@ -25,7 +25,7 @@ http://localhost:9000
 
 ## Features
 
-- **Console from Remote**
+- **Console toolkit**
 
 Support console of `log`, `clear`, `error`, `info`, `warn`, `time` and `timeEnd`:
 
@@ -35,7 +35,7 @@ console.log(document); // -> {xxx: 'String', xxx2: 'Function', ..., body: 'HTMLB
 ```
 <center>![console sync](http://7rf30v.com1.z0.glb.clouddn.com/console.png)</center>
 
-- **Execute Script**
+- **Script inject toolkit**
 
 Using `inject` method to execute script in remote browser:
 ```js
